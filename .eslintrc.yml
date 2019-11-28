@@ -1,0 +1,9 @@
+env:
+  es6: true
+  browser: true
+  commonjs: true
+
+extends: 'htmlacademy/es6'
+
+rules:
+  quotes: ["error", "single", { "allowTemplateLiterals": true }]
