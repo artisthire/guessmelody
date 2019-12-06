@@ -1,5 +1,3 @@
-'use strict';
-
 const del = require(`del`);
 const gulp = require(`gulp`);
 const sass = require(`gulp-sass`);
@@ -39,7 +37,7 @@ gulp.task(`style`, () => {
 });
 
 gulp.task(`scripts`, () => {
-  return gulp.src(`js/**/*.js`).
+  return gulp.src(`js/main.js`).
     pipe(plumber()).
     pipe(sourcemaps.init()).
     pipe(rollup({plugins: [terser()]}, 'iife')).
@@ -81,7 +79,9 @@ gulp.task(`js-watch`, [`scripts`], (done) => {
   done();
 });
 
-gulp.task(`serve`, [`assemble`], () => {
+gulp.task(`serve`, () => {
+  gulp.start(`assemble`);
+
   server.init({
     server: `./build`,
     notify: false,
