@@ -2,6 +2,7 @@
  * Модуль шаблона разметки для окна выиграша
  */
 import {getElementFromTemplate} from '../utilities.js';
+import {replayGame} from '../controller.js';
 
 const failTimeTemplate = `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
@@ -21,8 +22,7 @@ replayBtn.addEventListener('click', onReplayBtnClick);
  */
 function onReplayBtnClick(evt) {
   evt.preventDefault();
-  // используется для перезапуска
-  document.location.reload();
+  replayGame();
 }
 
 export default container;

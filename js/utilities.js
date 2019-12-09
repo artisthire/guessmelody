@@ -14,19 +14,6 @@ export function getElementFromTemplate(template) {
   return container;
 }
 
-// контейнер, в котором отображаются все игровые окна
-const screensContainer = document.querySelector('.main');
-
-/**
- * Показывает игровой экран получая DOM-элемент, который содержит всю разметку, сгерериованную на основе шаблона
- * @param {object} container - временный элемент-контейнер, содержащий разметку игрового окна
- */
-export function showGameScreen(container) {
-  screensContainer.textContent = '';
-
-  screensContainer.append(...container.children);
-}
-
 /**
  * Возвращает случайное целое число в заданном диапазоне min-max включая обе границы
  * @param {number} min - нижний предел диапазона в котором генерируется случайное число

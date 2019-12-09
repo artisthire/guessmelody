@@ -1,7 +1,8 @@
 /**
  * Модуль шаблона разметки для окна выбора артиста
  */
-import {getElementFromTemplate, showGameScreen, getRandomIntInclusive} from '../utilities.js';
+import {getElementFromTemplate, getRandomIntInclusive} from '../utilities.js';
+import {showGameScreen, replayGame} from '../controller.js';
 import screenResultSuccess from './result-success.js';
 import screenFailTime from './fail-time.js';
 import screenFailTries from './fail-tries.js';
@@ -68,9 +69,21 @@ const selectArtistTemplate = ` <section class="game game--artist">
 const container = getElementFromTemplate(selectArtistTemplate);
 const form = container.querySelector('.game__artist');
 const selectBtns = [...container.querySelectorAll('.artist__input')];
+const backBtn = container.querySelector('.game__back');
 
 // при клике на любую из кнопок ответов, показать окно с результатом игры
 form.addEventListener('click', onSelectBtnClick);
+// обработчик перезапуска игры
+backBtn.addEventListener('click', onBackBtnClick);
+
+/**
+ * Обработчик клика на кнопку начала игры заново
+ * @param {object} evt - объект события клика на кнопку
+ */
+function onBackBtnClick(evt) {
+  evt.preventDefault();
+  replayGame();
+}
 
 /**
  * Обработчик события клика на одину из кнопок ответа на выбор исполнителя песни

@@ -1,7 +1,8 @@
 /**
  * Модуль шаблона разметки для стартового окна
  */
-import {getElementFromTemplate, showGameScreen} from '../utilities.js';
+import {getElementFromTemplate} from '../utilities.js';
+import {showGameScreen} from '../controller.js';
 import screenSelectGenre from './game-genre.js';
 
 const welcomTemplate = `<section class="welcome">

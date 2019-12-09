@@ -1,7 +1,8 @@
 /**
  * Модуль шаблона разметки для окна выбора песни по жанру
  */
-import {getElementFromTemplate, showGameScreen} from '../utilities.js';
+import {getElementFromTemplate} from '../utilities.js';
+import {showGameScreen, replayGame} from '../controller.js';
 import screenSelectArtist from './game-artist.js';
 
 const selectGenreTemplate = `<section class="game game--genre">
@@ -84,6 +85,7 @@ const container = getElementFromTemplate(selectGenreTemplate);
 const form = container.querySelector('.game__tracks');
 const btnSubmit = container.querySelector('.game__submit');
 const selectBtns = [...container.querySelectorAll('.game__input')];
+const backBtn = container.querySelector('.game__back');
 
 // до выбора хотябы одной песни кнопка ответа отключена
 btnSubmit.disabled = true;
@@ -92,6 +94,17 @@ btnSubmit.disabled = true;
 form.addEventListener('click', onSelectBtnClick);
 // обработчки "Ответа"
 form.addEventListener('submit', onFormSubmit);
+// обработчик перезапуска игры
+backBtn.addEventListener('click', onBackBtnClick);
+
+/**
+ * Обработчик клика на кнопку начала игры заново
+ * @param {object} evt - объект события клика на кнопку
+ */
+function onBackBtnClick(evt) {
+  evt.preventDefault();
+  replayGame();
+}
 
 /**
  * Обработчик клика кнопки выбора песен, соответствующих жанру
