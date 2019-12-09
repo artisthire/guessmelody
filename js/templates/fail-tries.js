@@ -11,5 +11,18 @@ const failTriesTemplate = `<section class="result">
   </section>`;
 
 const container = getElementFromTemplate(failTriesTemplate);
+const replayBtn = container.querySelector('.result__replay');
+
+replayBtn.addEventListener('click', onReplayBtnClick);
+
+/**
+ * Обработчик события клика на кнопку перезапуска игрны
+ * @param {object} evt - объект события клика на кнопку
+ */
+function onReplayBtnClick(evt) {
+  evt.preventDefault();
+  // используется для перезапуска
+  document.location.reload();
+}
 
 export default container;

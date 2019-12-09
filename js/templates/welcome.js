@@ -22,6 +22,10 @@ const playBtn = container.querySelector('.welcome__button');
 // при клике на кнопку "Играть" показать первый экран игры
 playBtn.addEventListener('click', onPlayBtnClick);
 
+/**
+ * Обработчик события клика на кнопку начала игры
+ * @param {object} evt - объект события клика на кнопку
+ */
 function onPlayBtnClick(evt) {
   evt.preventDefault();
   showGameScreen(screenSelectGenre);

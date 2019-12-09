@@ -1,15 +1,10 @@
 /**
  * Модуль шаблона разметки для окна выбора артиста
  */
-import {getElementFromTemplate, showGameScreen} from '../utilities.js';
+import {getElementFromTemplate, showGameScreen, getRandomIntInclusive} from '../utilities.js';
 import screenResultSuccess from './result-success.js';
 import screenFailTime from './fail-time.js';
 import screenFailTries from './fail-tries.js';
-import screenWelcome from './welcome.js';
-
-const a = screenWelcome;
-
-console.log(a);
 
 const selectArtistTemplate = ` <section class="game game--artist">
     <header class="game__header">
@@ -74,16 +69,32 @@ const container = getElementFromTemplate(selectArtistTemplate);
 const form = container.querySelector('.game__artist');
 const selectBtns = [...container.querySelectorAll('.artist__input')];
 
+// при клике на любую из кнопок ответов, показать окно с результатом игры
 form.addEventListener('click', onSelectBtnClick);
 
+/**
+ * Обработчик события клика на одину из кнопок ответа на выбор исполнителя песни
+ * @param {object} evt - объект события клика на кнопку ответа
+ */
 function onSelectBtnClick(evt) {
-   const target = evt.target;
+  const target = evt.target;
 
-   if (!selectBtns.includes(target)) {
+  if (!selectBtns.includes(target)) {
     return;
-   }
+  }
 
-   showGameScreen(screenResultSuccess);
+  // временно отображается случайное окно с выиграшем или проиграшем
+  showGameScreen(getRandomResultScreen());
+}
+
+/**
+ * Временная функция, возвращающая одно случайное окно: выиграш, проиграш по времени или по попыткам
+ * @return {object} - шаблон с разметкой для случайного окна результата игры
+ */
+function getRandomResultScreen() {
+  const resultScreens = [screenResultSuccess, screenFailTime, screenFailTries];
+
+  return resultScreens[getRandomIntInclusive(0, resultScreens.length - 1)];
 }
 
 export default container;

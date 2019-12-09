@@ -1,8 +1,7 @@
 /**
  * Модуль шаблона разметки для окна выиграша
  */
-import {getElementFromTemplate, showGameScreen} from '../utilities.js';
-import screenWelcome from './welcome.js';
+import {getElementFromTemplate} from '../utilities.js';
 
 const resultSuccesTemplate = `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
@@ -15,13 +14,16 @@ const resultSuccesTemplate = `<section class="result">
 const container = getElementFromTemplate(resultSuccesTemplate);
 const replayBtn = container.querySelector('.result__replay');
 
-//console.log(screenWelcome);
-
 replayBtn.addEventListener('click', onReplayBtnClick);
 
+/**
+ * Обработчик события клика на кнопку перезапуска игрны
+ * @param {object} evt - объект события клика на кнопку
+ */
 function onReplayBtnClick(evt) {
   evt.preventDefault();
-  showGameScreen(screenWelcome);
+  // используется для перезапуска
+  document.location.reload();
 }
 
 export default container;
