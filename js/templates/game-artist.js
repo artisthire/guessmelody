@@ -1,8 +1,8 @@
 /**
  * Модуль шаблона разметки для окна выбора артиста
  */
-import {getElementFromTemplate, getRandomIntInclusive} from '../utilities.js';
-import {showGameScreen, replayGame} from '../controller.js';
+import {getRandomIntInclusive} from '../utilities.js';
+import {showGameScreen, startGame} from '../controller.js';
 import screenResultSuccess from './result-success.js';
 import screenFailTime from './fail-time.js';
 import screenFailTries from './fail-tries.js';
@@ -66,48 +66,56 @@ const selectArtistTemplate = ` <section class="game game--artist">
     </section>
   </section>`;
 
-const container = getElementFromTemplate(selectArtistTemplate);
-const form = container.querySelector('.game__artist');
-const selectBtns = [...container.querySelectorAll('.artist__input')];
-const backBtn = container.querySelector('.game__back');
-
-// при клике на любую из кнопок ответов, показать окно с результатом игры
-form.addEventListener('click', onSelectBtnClick);
-// обработчик перезапуска игры
-backBtn.addEventListener('click', onBackBtnClick);
-
 /**
- * Обработчик клика на кнопку начала игры заново
- * @param {object} evt - объект события клика на кнопку
+ * Функция инициализации DOM-элементов игрового окна
+ * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
+ * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function onBackBtnClick(evt) {
-  evt.preventDefault();
-  replayGame();
-}
+function initScreenSelectArtist(container) {
+  const form = container.querySelector('.game__artist');
+  const selectBtns = [...container.querySelectorAll('.artist__input')];
+  const backBtn = container.querySelector('.game__back');
 
-/**
- * Обработчик события клика на одину из кнопок ответа на выбор исполнителя песни
- * @param {object} evt - объект события клика на кнопку ответа
- */
-function onSelectBtnClick(evt) {
-  const target = evt.target;
+  // при клике на любую из кнопок ответов, показать окно с результатом игры
+  form.addEventListener('click', onSelectBtnClick);
+  // обработчик перезапуска игры
+  backBtn.addEventListener('click', onBackBtnClick);
 
-  if (!selectBtns.includes(target)) {
-    return;
+  return container;
+
+  /**
+   * Обработчик клика на кнопку начала игры заново
+   * @param {object} evt - объект события клика на кнопку
+   */
+  function onBackBtnClick(evt) {
+    evt.preventDefault();
+    startGame();
   }
 
-  // временно отображается случайное окно с выиграшем или проиграшем
-  showGameScreen(getRandomResultScreen());
+  /**
+   * Обработчик события клика на одину из кнопок ответа на выбор исполнителя песни
+   * @param {object} evt - объект события клика на кнопку ответа
+   */
+  function onSelectBtnClick(evt) {
+    const target = evt.target;
+
+    if (!selectBtns.includes(target)) {
+      return;
+    }
+
+    // временно отображается случайное окно с выиграшем или проиграшем
+    showGameScreen(getRandomResultScreen());
+  }
+
+  /**
+   * Временная функция, возвращающая одно случайное окно: выиграш, проиграш по времени или по попыткам
+   * @return {object} - шаблон с разметкой для случайного окна результата игры
+   */
+  function getRandomResultScreen() {
+    const resultScreens = [screenResultSuccess, screenFailTime, screenFailTries];
+
+    return resultScreens[getRandomIntInclusive(0, resultScreens.length - 1)];
+  }
 }
 
-/**
- * Временная функция, возвращающая одно случайное окно: выиграш, проиграш по времени или по попыткам
- * @return {object} - шаблон с разметкой для случайного окна результата игры
- */
-function getRandomResultScreen() {
-  const resultScreens = [screenResultSuccess, screenFailTime, screenFailTries];
-
-  return resultScreens[getRandomIntInclusive(0, resultScreens.length - 1)];
-}
-
-export default container;
+export default {template: selectArtistTemplate, initFunction: initScreenSelectArtist};

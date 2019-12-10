@@ -1,4 +1,4 @@
-import {showGameScreen} from './controller.js';
-import screenWelcome from './templates/welcome.js';
+import {startGame} from './controller.js';
+
 // показываем окно приветствия
-showGameScreen(screenWelcome);
+startGame();

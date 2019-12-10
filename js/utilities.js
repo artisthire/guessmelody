@@ -9,7 +9,7 @@
  */
 export function getElementFromTemplate(template) {
   const container = document.createElement('div');
-  container.insertAdjacentHTML('afterbegin', template);
+  container.innerHTML = template;
 
   return container;
 }

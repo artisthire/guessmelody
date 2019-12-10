@@ -1,8 +1,7 @@
 /**
  * Модуль шаблона разметки для окна выиграша
  */
-import {getElementFromTemplate} from '../utilities.js';
-import {replayGame} from '../controller.js';
+import {startGame} from '../controller.js';
 
 const failTimeTemplate = `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
@@ -11,18 +10,26 @@ const failTimeTemplate = `<section class="result">
     <button class="result__replay" type="button">Попробовать ещё раз</button>
   </section>`;
 
-const container = getElementFromTemplate(failTimeTemplate);
-const replayBtn = container.querySelector('.result__replay');
-
-replayBtn.addEventListener('click', onReplayBtnClick);
-
 /**
- * Обработчик события клика на кнопку перезапуска игрны
- * @param {object} evt - объект события клика на кнопку
+ * Функция инициализации DOM-элементов игрового окна
+ * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
+ * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function onReplayBtnClick(evt) {
-  evt.preventDefault();
-  replayGame();
+function initScreenFailTime(container) {
+  const replayBtn = container.querySelector('.result__replay');
+
+  replayBtn.addEventListener('click', onReplayBtnClick);
+
+  return container;
+
+  /**
+   * Обработчик события клика на кнопку перезапуска игрны
+   * @param {object} evt - объект события клика на кнопку
+   */
+  function onReplayBtnClick(evt) {
+    evt.preventDefault();
+    startGame();
+  }
 }
 
-export default container;
+export default {template: failTimeTemplate, initFunction: initScreenFailTime};

@@ -1,8 +1,7 @@
 /**
  * Модуль шаблона разметки для окна выбора песни по жанру
  */
-import {getElementFromTemplate} from '../utilities.js';
-import {showGameScreen, replayGame} from '../controller.js';
+import {showGameScreen, startGame} from '../controller.js';
 import screenSelectArtist from './game-artist.js';
 
 const selectGenreTemplate = `<section class="game game--genre">
@@ -81,79 +80,87 @@ const selectGenreTemplate = `<section class="game game--genre">
     </section>
   </section>`;
 
-const container = getElementFromTemplate(selectGenreTemplate);
-const form = container.querySelector('.game__tracks');
-const btnSubmit = container.querySelector('.game__submit');
-const selectBtns = [...container.querySelectorAll('.game__input')];
-const backBtn = container.querySelector('.game__back');
-
-// до выбора хотябы одной песни кнопка ответа отключена
-btnSubmit.disabled = true;
-
-// обработчик по клику на одну из кнопок выбора песни
-form.addEventListener('click', onSelectBtnClick);
-// обработчки "Ответа"
-form.addEventListener('submit', onFormSubmit);
-// обработчик перезапуска игры
-backBtn.addEventListener('click', onBackBtnClick);
-
 /**
- * Обработчик клика на кнопку начала игры заново
- * @param {object} evt - объект события клика на кнопку
+ * Функция инициализации DOM-элементов игрового окна
+ * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
+ * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function onBackBtnClick(evt) {
-  evt.preventDefault();
-  replayGame();
-}
+function initScreenSelectGenre(container) {
+  const form = container.querySelector('.game__tracks');
+  const btnSubmit = container.querySelector('.game__submit');
+  const selectBtns = [...container.querySelectorAll('.game__input')];
+  const backBtn = container.querySelector('.game__back');
 
-/**
- * Обработчик клика кнопки выбора песен, соответствующих жанру
- * Навешен на общую форму с кнопками (делегирование события клика)
- * @param {object} evt - объект события при клике на одну из кнопок внутри формы
- */
-function onSelectBtnClick(evt) {
-  const target = evt.target;
+  // до выбора хотябы одной песни кнопка ответа отключена
+  btnSubmit.disabled = true;
 
-  // если клик не по одной из кнопок выбора песни ничего не делаем
-  if (!selectBtns.includes(target)) {
-    return;
+  // обработчик по клику на одну из кнопок выбора песни
+  form.addEventListener('click', onSelectBtnClick);
+  // обработчки "Ответа"
+  form.addEventListener('submit', onFormSubmit);
+  // обработчик перезапуска игры
+  backBtn.addEventListener('click', onBackBtnClick);
+
+  return container;
+
+  /**
+   * Обработчик клика на кнопку начала игры заново
+   * @param {object} evt - объект события клика на кнопку
+   */
+  function onBackBtnClick(evt) {
+    evt.preventDefault();
+    startGame();
   }
 
-  // если не выбран ни одина из песен, на следующий экран не переходим
-  if (!getSelectedGenres().length) {
-    btnSubmit.disabled = true;
-    return;
+  /**
+   * Обработчик клика кнопки выбора песен, соответствующих жанру
+   * Навешен на общую форму с кнопками (делегирование события клика)
+   * @param {object} evt - объект события при клике на одну из кнопок внутри формы
+   */
+  function onSelectBtnClick(evt) {
+    const target = evt.target;
+
+    // если клик не по одной из кнопок выбора песни ничего не делаем
+    if (!selectBtns.includes(target)) {
+      return;
+    }
+
+    // если не выбран ни одина из песен, на следующий экран не переходим
+    if (!getSelectedGenres().length) {
+      btnSubmit.disabled = true;
+      return;
+    }
+
+    // иначе разрешаем нажать кнопку "Ответ" и перейти на следующий игровой экран
+    btnSubmit.disabled = false;
   }
 
-  // иначе разрешаем нажать кнопку "Ответ" и перейти на следующий игровой экран
-  btnSubmit.disabled = false;
-}
+  /**
+   * Обработчик подтвержения выбора песен, соответствующих заданному жанру (ответа на форму с checkboxes)
+   * @param {object} evt - объект события submit формы
+   */
+  function onFormSubmit(evt) {
+    evt.preventDefault();
 
-/**
- * Обработчик подтвержения выбора песен, соответствующих заданному жанру (ответа на форму с checkboxes)
- * @param {object} evt - объект события submit формы
- */
-function onFormSubmit(evt) {
-  evt.preventDefault();
+    // если не выбрана ни одна из песен, ничего не делаем
+    if (!getSelectedGenres().length) {
+      return;
+    }
 
-  // если не выбрана ни одна из песен, ничего не делаем
-  if (!getSelectedGenres().length) {
-    return;
+    // иначе показываем следующий игровой экран
+    showGameScreen(screenSelectArtist);
   }
 
-  // иначе показываем следующий игровой экран
-  showGameScreen(screenSelectArtist);
+  /**
+   * Функция, которая возвращает все выбранные игроком песни
+   * @return {array} evt - массив DOM-элементов checkbox-сов выбранных песен
+   */
+  function getSelectedGenres() {
+    // найти все выбранные жанры
+    const checkedSelectBtns = selectBtns.filter((checkbox) => checkbox.checked);
+
+    return checkedSelectBtns;
+  }
 }
 
-/**
- * Функция, которая возвращает все выбранные игроком песни
- * @return {array} evt - массив DOM-элементов checkbox-сов выбранных песен
- */
-function getSelectedGenres() {
-  // найти все выбранные жанры
-  const checkedSelectBtns = selectBtns.filter((checkbox) => checkbox.checked);
-
-  return checkedSelectBtns;
-}
-
-export default container;
+export default {template: selectGenreTemplate, initFunction: initScreenSelectGenre};
