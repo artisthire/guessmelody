@@ -10,6 +10,7 @@ const CORRECT_RATIO = 1;
 const FAIL_RATIO = -2;
 // количество возможных ошибок (нот)
 const TOTAL_NOTES = 2;
+const TOTAL_QUESTION = 10;
 
 /**
  * Функция подсчета набранных игроком баллов
@@ -21,28 +22,59 @@ const TOTAL_NOTES = 2;
  */
 export function calcUserResult(answers, notes) {
 
-  // количество правильных ответов
-  let successAnswer = 0;
-  // количество быстрых ответов
-  let quickAnswer = 0;
-
-  answers.forEach((answer) => {
-    // количество правильных ответов
-    if (answer.result) {
-      successAnswer++;
-    }
-    // количество "быстрых" ответов, выполненых ранее заданного предела
-    if (answer.time < LIMIT_TIME) {
-      quickAnswer++;
-    }
-  });
-
-  // если ответом меньше 10
-  if (successAnswer < 10) {
+  // если ответом меньше чем вопросов, то это поражение
+  if (answers.length < TOTAL_QUESTION) {
     return -1;
   }
 
-  let rezult = quickAnswer * QUICK_RATIO + (successAnswer - quickAnswer) * CORRECT_RATIO + (TOTAL_NOTES - notes) * FAIL_RATIO;
+  // количество быстрых ответов
+  const quickAnswer = answers.reduce((sum, answer) => sum + ((answer.time < LIMIT_TIME) ? 1 : 0), 0);
+
+  const rezult = quickAnswer * QUICK_RATIO + (TOTAL_QUESTION - quickAnswer) * CORRECT_RATIO + (TOTAL_NOTES - notes) * FAIL_RATIO;
 
   return rezult;
+}
+
+
+//TODO: Массив результатов должен обновляться и при проигрыше!
+/**
+ * Функция возвращает сообщение с результатом игры пользователем
+ * При выиграше рассчитывает рейтинг пользователя в общем массиве результатов игр других пользователей
+ * @param {array} results - массив результатов других пользователей
+ * @param {object} userResult - объект с результатом игры пользователя
+ * @return {string} - строка сообщения с результатом игры
+ */
+export function getUserResult(results, userResult) {
+
+  if (userResult.lastLive <= 0 && userResult.rating < TOTAL_QUESTION) {
+    return 'У вас закончились все попытки. Ничего, повезёт в следующий раз!';
+  }
+
+  if (userResult.lastTime <= 0) {
+    return 'Время вышло! Вы не успели отгадать все мелодии';
+  }
+
+  const ratings = updateRatings(results, userResult.rating);
+  const {userPosition, totalUsers, percentRating} = getUserRating(ratings, userResult.rating);
+
+  return `Вы заняли ${userPosition} место из ${totalUsers} игроков. Это лучше, чем у ${percentRating}% игроков`;
+}
+
+export function updateRatings(ratings, userRating) {
+
+  const rezultRating = [...ratings];
+
+  if (!rezultRating.includes(userRating)) {
+    rezultRating.push(userRating);
+  }
+
+  return rezultRating.sort((a, b) => b - a);
+}
+
+export function getUserRating(ratings, userRating) {
+  const userPosition = ratings.indexOf(userRating) + 1;
+  const totalUsers = ratings.length;
+  const percentRating = Math.round((totalUsers - userPosition) / totalUsers * 100);
+
+  return {userPosition, totalUsers, percentRating};
 }
