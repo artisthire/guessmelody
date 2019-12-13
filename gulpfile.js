@@ -12,6 +12,8 @@ const imagemin = require(`gulp-imagemin`);
 const rollup = require(`gulp-better-rollup`);
 const {terser} = require('rollup-plugin-terser');
 const sourcemaps = require(`gulp-sourcemaps`);
+const mocha = require(`gulp-mocha`);
+const commonjs = require(`rollup-plugin-commonjs`);
 
 gulp.task(`style`, () => {
   return gulp.src(`sass/style.scss`).
@@ -96,7 +98,7 @@ gulp.task(`serve`, () => {
       gulp.start(`copy-html`);
     }
   });
-  gulp.watch(`js/**/*.js`, [`js-watch`]);
+  gulp.watch([`js/**/*.js`, `!js/**/*.test.js`], [`js-watch`]);
 });
 
 gulp.task(`assemble`, [`clean`], () => {
@@ -107,5 +109,20 @@ gulp.task(`build`, [`assemble`], () => {
   gulp.start(`imagemin`);
 });
 
+gulp.task(`test:once`, () => {
+  return gulp.src(`js/**/*.test.js`).
+  pipe(rollup({
+    plugins: [
+      commonjs()
+    ]}, `cjs`)).
+  pipe(gulp.dest(`build/test`)).
+  pipe(mocha({
+    reporter: `spec`
+  }));
+});
+
 gulp.task(`test`, () => {
+  gulp.start(`test:once`);
+
+  gulp.watch(`js/**/*.test.js`, [`test:once`]);
 });
