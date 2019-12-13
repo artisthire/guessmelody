@@ -1,7 +1,7 @@
 /**
  * Модуль шаблона разметки для окна выбора артиста
  */
-import {getRandomIntInclusive} from '../utilities.js';
+import {getElementFromTemplate, getRandomIntInclusive} from '../utilities.js';
 import {showGameScreen, startGame} from '../controller.js';
 import screenResultSuccess from './result-success.js';
 import screenFailTime from './fail-time.js';
@@ -66,6 +66,8 @@ const selectArtistTemplate = ` <section class="game game--artist">
     </section>
   </section>`;
 
+const selectArtistScreen = getElementFromTemplate(selectArtistTemplate);
+
 /**
  * Функция инициализации DOM-элементов игрового окна
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
@@ -118,4 +120,4 @@ function initScreenSelectArtist(container) {
   }
 }
 
-export default {template: selectArtistTemplate, initFunction: initScreenSelectArtist};
+export default {container: selectArtistScreen, initFunction: initScreenSelectArtist};

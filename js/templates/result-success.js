@@ -2,6 +2,7 @@
  * Модуль шаблона разметки для окна выиграша
  */
 import {startGame} from '../controller.js';
+import {getElementFromTemplate} from '../utilities.js';
 
 const resultSuccesTemplate = `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
@@ -10,6 +11,8 @@ const resultSuccesTemplate = `<section class="result">
     <p class="result__text">Вы заняли 2 место из 10. Это лучше чем у 80% игроков</p>
     <button class="result__replay" type="button">Сыграть ещё раз</button>
   </section>`;
+
+const resultSuccesScreen = getElementFromTemplate(resultSuccesTemplate);
 
 /**
  * Функция инициализации DOM-элементов игрового окна
@@ -33,4 +36,4 @@ function initScreenResultSucces(container) {
   }
 }
 
-export default {template: resultSuccesTemplate, initFunction: initScreenResultSucces};
+export default {container: resultSuccesScreen, initFunction: initScreenResultSucces};

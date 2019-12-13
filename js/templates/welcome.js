@@ -2,6 +2,7 @@
  * Модуль шаблона разметки для стартового окна
  */
 import {showGameScreen} from '../controller.js';
+import {getElementFromTemplate} from '../utilities.js';
 import screenSelectGenre from './game-genre.js';
 
 // шаблон игрового окна
@@ -16,6 +17,8 @@ const welcomTemplate = `<section class="welcome">
     </ul>
     <p class="welcome__text">Удачи!</p>
   </section>`;
+
+const welcomScreen = getElementFromTemplate(welcomTemplate);
 
 /**
  * Функция инициализации DOM-элементов игрового окна
@@ -40,4 +43,4 @@ function initScreenWelcom(container) {
   return container;
 }
 
-export default {template: welcomTemplate, initFunction: initScreenWelcom};
+export default {container: welcomScreen, initFunction: initScreenWelcom};

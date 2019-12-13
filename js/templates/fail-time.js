@@ -2,6 +2,7 @@
  * Модуль шаблона разметки для окна выиграша
  */
 import {startGame} from '../controller.js';
+import {getElementFromTemplate} from '../utilities.js';
 
 const failTimeTemplate = `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
@@ -9,6 +10,8 @@ const failTimeTemplate = `<section class="result">
     <p class="result__total result__total--fail">Время вышло! Вы не успели отгадать все мелодии</p>
     <button class="result__replay" type="button">Попробовать ещё раз</button>
   </section>`;
+
+const failTimeScreen = getElementFromTemplate(failTimeTemplate);
 
 /**
  * Функция инициализации DOM-элементов игрового окна
@@ -32,4 +35,4 @@ function initScreenFailTime(container) {
   }
 }
 
-export default {template: failTimeTemplate, initFunction: initScreenFailTime};
+export default {container: failTimeScreen, initFunction: initScreenFailTime};

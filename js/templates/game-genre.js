@@ -2,6 +2,7 @@
  * Модуль шаблона разметки для окна выбора песни по жанру
  */
 import {showGameScreen, startGame} from '../controller.js';
+import {getElementFromTemplate} from '../utilities.js';
 import screenSelectArtist from './game-artist.js';
 
 const selectGenreTemplate = `<section class="game game--genre">
@@ -79,6 +80,8 @@ const selectGenreTemplate = `<section class="game game--genre">
       </form>
     </section>
   </section>`;
+
+const selectGenreScreen = getElementFromTemplate(selectGenreTemplate);
 
 /**
  * Функция инициализации DOM-элементов игрового окна
@@ -163,4 +166,4 @@ function initScreenSelectGenre(container) {
   }
 }
 
-export default {template: selectGenreTemplate, initFunction: initScreenSelectGenre};
+export default {container: selectGenreScreen, initFunction: initScreenSelectGenre};
