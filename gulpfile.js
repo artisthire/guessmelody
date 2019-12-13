@@ -124,5 +124,5 @@ gulp.task(`test:once`, () => {
 gulp.task(`test`, () => {
   gulp.start(`test:once`);
 
-  gulp.watch(`js/**/*.test.js`, [`test:once`]);
+  gulp.watch(`js/**/*.js`, [`test:once`]);
 });
