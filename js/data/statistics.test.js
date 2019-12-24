@@ -1,28 +1,47 @@
 import {getRandomIntInclusive} from '../utilities.js';
 import {assert} from 'chai';
 
-import {calcUserResult, getUserResult, updateRatings, getUserRating} from './game-statistic.js';
+import {calcUserResult, getGameResult, updateRatings, getUserRating} from './statistics.js';
 
 describe('Проверка функции подсчета статистики', function () {
 
-  function getFakeAnswers(successAnswer, littleTime) {
+  /**
+ * Функция используется для генерации фальшивых результатов игры, в целях тестирования
+ * @param {number} successAnswer - колличество правильных ответов
+ * @param {number} fastAnswer - колличество быстрых ответов
+ * @param {number} totalAnswers - общее колличество ответов, которые дал пользователей. По-умолчанию = 10
+ * @return {object} - объект с массивом результатов игры
+ *  [{result: true|false (правильный/неправильный ответ), time: {number} (секунд затраченных на ответ)}]
+ */
+  function getFakeAnswers(successAnswer, fastAnswer, totalAnswers = 10) {
     let answers = [];
-    let time = littleTime;
-    let answer;
+    const FAST_TIME = 20 * 1000;
+    const LOW_TIME = 40 * 1000;
 
-    for (let i = 0; i < successAnswer; i++) {
-      answer = time > 0 ? {result: true, time: 20} : {result: true, time: 40};
-      answers.push(answer);
-      time--;
+    for (let i = totalAnswers; i--;) {
+      answers.push({result: false, time: LOW_TIME});
+    }
+
+    const createArray = (length) => Array.from({length}, (v, k) => k);
+    const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+    const trueAnswerIndexes = shuffle(createArray(totalAnswers)).slice(0, successAnswer);
+    const fastAnswerIndexes = shuffle(createArray(totalAnswers)).slice(0, fastAnswer);
+
+    for (let indexTrue of trueAnswerIndexes) {
+      answers[indexTrue].result = true;
+    }
+
+    for (let indexFast of fastAnswerIndexes) {
+      answers[indexFast].time = FAST_TIME;
     }
 
     return answers;
   }
 
-
-  it('Должно быть -1, когда ответом меньше чем нужно', function () {
-    assert.equal(-1, calcUserResult(getFakeAnswers(8, 0)));
-    assert.equal(-1, calcUserResult(getFakeAnswers(5, 0)));
+  it('Должно быть -1, когда пользователь не успел ответить на все вопросы', function () {
+    assert.equal(-1, calcUserResult(getFakeAnswers(5, 0, 8), 2));
+    assert.equal(-1, calcUserResult(getFakeAnswers(2, 2, 5), 2));
   });
 
   it('Должно быть 10, когда ответы правильные но медленные', function () {
@@ -40,30 +59,30 @@ describe('Проверка функции подсчета статистики'
 describe('Проверка функции выбода результата игры', function () {
 
   it('Должен быть проигрыш, когда закончились попытки', function () {
-    assert.match(getUserResult([11, 10, 8, 5, 4], {rating: 8, lastLive: 0, lastTime: 50}), /попытки/);
-    assert.match(getUserResult([11, 10, 8, 5, 4], {rating: 5, lastLive: 0, lastTime: 50}), /попытки/);
+    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 8, lastLive: 0, lastTime: 50}), /попытки/);
+    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 5, lastLive: 0, lastTime: 50}), /попытки/);
   });
 
   it('Должен быть проигрыш, когда законилось время', function () {
-    assert.match(getUserResult([11, 10, 8, 5, 4], {rating: 9, lastLive: 1, lastTime: 0}), /Время/);
-    assert.match(getUserResult([11, 10, 8, 5, 4], {rating: 10, lastLive: 2, lastTime: 0}), /Время/);
+    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 9, lastLive: 1, lastTime: 0}), /Время/);
+    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 10, lastLive: 2, lastTime: 0}), /Время/);
   });
 
   it('Должен быть выигрыш, когда не закончились попытки и время', function () {
-    assert.match(getUserResult([11, 10, 8, 5, 4], {rating: 10, lastLive: 1, lastTime: 20}), /место/);
+    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 10, lastLive: 1, lastTime: 20}), /место/);
   });
 
   it('Должна правильно рассчитываться позиция игрока в общем рейтинге', function () {
-    assert.match(getUserResult([15, 14, 13, 12, 10], {rating: 16, lastLive: 1, lastTime: 20}), /1 место/);
-    assert.match(getUserResult([15, 14, 13, 12, 10], {rating: 10, lastLive: 1, lastTime: 20}), /5 место/);
-    assert.match(getUserResult([16, 17, 18, 15, 14, 13, 12, 10], {rating: 15, lastLive: 1, lastTime: 20}), /4 место/);
+    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /1 место/);
+    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 10, lastLive: 1, lastTime: 20}), /5 место/);
+    assert.match(getGameResult([16, 17, 18, 15, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /4 место/);
   });
 
   it('Должна правильно рассчитываться процент игроков с меньшим рейтингом', function () {
-    assert.match(getUserResult([15, 14, 13, 12, 10], {rating: 16, lastLive: 1, lastTime: 20}), /83%/);
-    assert.match(getUserResult([20, 19, 15, 14, 13, 12, 11, 10], {rating: 18, lastLive: 1, lastTime: 20}), /67%/);
-    assert.match(getUserResult([15, 14, 13, 12], {rating: 10, lastLive: 1, lastTime: 20}), /0%/);
-    assert.match(getUserResult([16, 17, 18, 14, 13, 12, 10], {rating: 15, lastLive: 1, lastTime: 20}), /50%/);
+    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /83%/);
+    assert.match(getGameResult([20, 19, 15, 14, 13, 12, 11, 10], {result: 18, lastLive: 1, lastTime: 20}), /67%/);
+    assert.match(getGameResult([15, 14, 13, 12], {result: 10, lastLive: 1, lastTime: 20}), /0%/);
+    assert.match(getGameResult([16, 17, 18, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /50%/);
   });
 });
 
@@ -87,8 +106,7 @@ describe('Проверка функции добавления рейтинга 
   });
 });
 
-/* Для тестирования внутренней функции подсчета рейтинга пользователя
-// Заменена на проверку правильности формирования строки в функции getUserResult которая использует getUserRating
+// Для тестирования внутренней функции подсчета рейтинга пользователя
 describe('Проверка функции расчета рейтинга текущего пользователя игры', function () {
 
   it('Возвращает объект вида {userPosition: .., totalUsers: .., percentRating: ..}', function () {
@@ -107,7 +125,7 @@ describe('Проверка функции расчета рейтинга тек
     assert.propertyVal(getUserRating([4], 11), 'totalUsers', 1);
   });
 
-  it('Правильно рассчитывает процент пользователей у которых рейтинг меньше', function (){
+  it('Правильно рассчитывает процент пользователей у которых рейтинг меньше', function () {
     assert.propertyVal(getUserRating([11, 10, 8, 5, 4], 10), 'percentRating', 60);
     assert.propertyVal(getUserRating([11, 10, 8, 5, 4], 8), 'percentRating', 40);
     assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 8), 'percentRating', 22);
@@ -116,4 +134,4 @@ describe('Проверка функции расчета рейтинга тек
     assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 14), 'percentRating', 78);
   });
 });
-*/
+
