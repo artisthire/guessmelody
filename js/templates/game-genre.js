@@ -5,7 +5,7 @@ import {showGameScreen, startGame} from '../controller.js';
 import {getElementFromTemplate} from '../utilities.js';
 import screenSelectArtist from './game-artist.js';
 
-const selectGenreTemplate = `<section class="game game--genre">
+const screenHeader = `<section class="game game--genre">
     <header class="game__header">
       <a class="game__back" href="#">
         <span class="visually-hidden">Сыграть ещё раз</span>
@@ -27,9 +27,9 @@ const selectGenreTemplate = `<section class="game game--genre">
         <div class="wrong"></div>
         <div class="wrong"></div>
       </div>
-    </header>
+    </header>`;
 
-    <section class="game__screen">
+const screenBody = `<section class="game__screen">
       <h2 class="game__title">Выберите инди-рок треки</h2>
       <form class="game__tracks">
         <div class="track">
@@ -81,7 +81,7 @@ const selectGenreTemplate = `<section class="game game--genre">
     </section>
   </section>`;
 
-const selectGenreScreen = getElementFromTemplate(selectGenreTemplate);
+const selectGenreScreen = getElementFromTemplate(screenHeader + screenBody);
 
 /**
  * Функция инициализации DOM-элементов игрового окна

@@ -7,7 +7,7 @@ import screenResultSuccess from './result-success.js';
 import screenFailTime from './fail-time.js';
 import screenFailTries from './fail-tries.js';
 
-const selectArtistTemplate = ` <section class="game game--artist">
+const screenHeader = ` <section class="game game--artist">
     <header class="game__header">
       <a class="game__back" href="#">
         <span class="visually-hidden">Сыграть ещё раз</span>
@@ -29,12 +29,12 @@ const selectArtistTemplate = ` <section class="game game--artist">
         <div class="wrong"></div>
         <div class="wrong"></div>
       </div>
-    </header>
+    </header>`;
 
-    <section class="game__screen">
+const screenBody = `<section class="game__screen">
       <h2 class="game__title">Кто исполняет эту песню?</h2>
       <div class="game__track">
-        <button class="track__button track__button--play" type="button"></button>
+        <button class="track__button track__button--pause" type="button"></button>
         <audio></audio>
       </div>
 
@@ -66,7 +66,7 @@ const selectArtistTemplate = ` <section class="game game--artist">
     </section>
   </section>`;
 
-const selectArtistScreen = getElementFromTemplate(selectArtistTemplate);
+const selectArtistScreen = getElementFromTemplate(screenHeader + screenBody);
 
 /**
  * Функция инициализации DOM-элементов игрового окна
