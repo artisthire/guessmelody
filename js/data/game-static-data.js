@@ -23,8 +23,8 @@ export default [
   },
   {
     artist: `Riot`,
-    name: ` Level Plane`,
-    image: `https://i.ytimg.com/vi/jzgM3m8Vp1k/maxresdefault.jpg`,
+    name: `Level Plane`,
+    image: `https://yt3.ggpht.com/a/AGF-l7-BSwMnN5-kvIOxYVDXV1TRBG-G8LTRpjsHPQ=s48-c-k-c0xffffffff-no-rj-mo`,
     src: `https://www.youtube.com/audiolibrary_download?vid=dfb828f40096184c`,
     genre: `R&B`
   },
@@ -38,7 +38,7 @@ export default [
   {
     artist: `Quincas Moreira`,
     name: `Firefly`,
-    image: `http://www.atribuna.com.br/fileadmin/_processed_/csm_Quincas-Moreira-Foto-Divulgacao_76d1a8b00e.jpg`,
+    image: `https://assets.mubi.com/images/cast_member/535878/image-w240.jpg?1523578011`,
     src: `https://www.youtube.com/audiolibrary_download?vid=79100e44c826e2f7`,
     genre: `Electronic`
   }
