@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import sinon from '../../node_modules/sinon/pkg/sinon-esm.js';
 
 import {initConfig, statisticConfig} from '../data/config.js';
-import {gameLife, levelSpeed, levelSwitcher} from './process.js';
+import {gameLife, levelSpeed} from './process.js';
 
 describe('Тестирование функции управления жизнями', function () {
   beforeEach(function () {
@@ -54,27 +54,6 @@ describe('Тестирование функции скорости ответа 
     assert.isTrue(levelSpeed.getAnswerSpeed());
     clock.tick(1);
     assert.isTrue(levelSpeed.getAnswerSpeed());
-  });
-});
-
-describe('Тестирование функции переключения уровней', function () {
-  beforeEach(function () {
-    levelSwitcher.level = initConfig.initLevel;
-  });
-
-  it(`Начальный уровень должен быть равен ${initConfig.initLevel}`, function () {
-    assert.equal(initConfig.initLevel, levelSwitcher.level);
-  });
-
-  it(`При каждом переключении уровень должен увеличиваться на 1`, function () {
-    assert.increasesBy(levelSwitcher.next.bind(levelSwitcher), levelSwitcher, 'level', 1);
-  });
-
-  it(`Должен быть -1 когда переход на уровень выше максимального`, function () {
-    for (let i = initConfig.initLevel; i <= initConfig.questions; i++) {
-      levelSwitcher.next();
-    }
-    assert.equal(-1, levelSwitcher.next());
   });
 });
 

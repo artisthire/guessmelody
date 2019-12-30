@@ -1,12 +1,10 @@
 /**
  * Модуль шаблона разметки для стартового окна
  */
-import {showGameScreen} from '../controller.js';
-import {getElementFromTemplate} from '../utilities.js';
-import screenSelectGenre from './game-genre.js';
+import {nextLevel} from '../controller.js';
 
 // шаблон игрового окна
-const welcomTemplate = `<section class="welcome">
+const welcomTemplate = () => `<section class="welcome">
     <div class="welcome__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     <button class="welcome__button"><span class="visually-hidden">Начать игру</span></button>
     <h2 class="welcome__rules-title">Правила игры</h2>
@@ -18,14 +16,12 @@ const welcomTemplate = `<section class="welcome">
     <p class="welcome__text">Удачи!</p>
   </section>`;
 
-const welcomScreen = getElementFromTemplate(welcomTemplate);
-
 /**
  * Функция инициализации DOM-элементов игрового окна
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function initScreenWelcom(container) {
+function initScreen(container) {
   const playBtn = container.querySelector('.welcome__button');
 
   // при клике на кнопку "Играть" показать первый экран игры
@@ -37,10 +33,10 @@ function initScreenWelcom(container) {
    */
   function onPlayBtnClick(evt) {
     evt.preventDefault();
-    showGameScreen(screenSelectGenre);
+    nextLevel();
   }
 
   return container;
 }
 
-export default {container: welcomScreen, initFunction: initScreenWelcom};
+export default {template: welcomTemplate, initFunction: initScreen};

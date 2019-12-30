@@ -2,15 +2,15 @@ import {initConfig, statisticConfig} from '../data/config.js';
 
 // управление колличеством игровых жизней
 export const gameLife = {
-  currentLife: initConfig.life,
+  currentLife: initConfig.lifes,
   get life() {
     return this.currentLife;
   },
   set life(count) {
     this.currentLife = count;
   },
-  decrement() {
-    if (this.currentLife < 0) {
+  remove() {
+    if (this.currentLife <= 0) {
       return -1;
     }
 
@@ -25,22 +25,5 @@ export const levelSpeed = {
   },
   getAnswerSpeed() {
     return (new Date().getTime() - this.startTime) <= statisticConfig.limitTime;
-  }
-};
-
-export const levelSwitcher = {
-  currentLevel: initConfig.initLevel,
-  get level() {
-    return this.currentLevel;
-  },
-  set level(level) {
-    this.currentLevel = level;
-  },
-  next() {
-    if (this.currentLevel > initConfig.questions) {
-      return -1;
-    }
-
-    return this.currentLevel++;
   }
 };

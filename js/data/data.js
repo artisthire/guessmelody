@@ -1,14 +1,13 @@
 /**
  * Содержит структуры данных для использования в игре
  */
-
 import staticGameData from './game-static-data.js';
 
 // состояние игры
 // в statistics добавляются результаты ответов по каждому уровню
 export const gameState = {
-  level: 1,
-  lives: 2,
+  level: 0,
+  lifes: 3,
   statistics: []
 };
 

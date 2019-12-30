@@ -1,69 +1,39 @@
 /**
  * Модуль шаблона разметки для окна выбора песни по жанру
  */
-import {showGameScreen, startGame} from '../controller.js';
-import {getElementFromTemplate} from '../utilities.js';
-import screenSelectArtist from './game-artist.js';
-import {questions} from '../data/data.js';
+import {nextLevel} from '../controller.js';
 
-const screenHeader = `<section class="game game--genre">
-    <header class="game__header">
-      <a class="game__back" href="#">
-        <span class="visually-hidden">Сыграть ещё раз</span>
-        <img class="game__logo" src="/img/melody-logo-ginger.png" alt="Угадай мелодию">
-      </a>
+const screen = (question) => `<section class="game__screen">
+  <h2 class="game__title">${question.title}</h2>
+  <form class="game__tracks">
 
-      <svg xmlns="http://www.w3.org/2000/svg" class="timer" viewBox="0 0 780 780">
-        <circle class="timer__line" cx="390" cy="390" r="370" style="filter: url(.#blur); transform: rotate(-90deg) scaleY(-1); transform-origin: center">
-      </svg>
 
-      <div class="timer__value" xmlns="http://www.w3.org/1999/xhtml">
-        <span class="timer__mins">05</span>
-        <span class="timer__dots">:</span>
-        <span class="timer__secs">00</span>
+  ${question.answers.map((answer, index) =>
+    `<div class="track">
+      <button class="track__button track__button--play" type="button"></button>
+      <div class="track__status">
+        <audio></audio>
       </div>
-
-      <div class="game__mistakes">
-        <div class="wrong"></div>
-        <div class="wrong"></div>
-        <div class="wrong"></div>
+      <div class="game__answer">
+        <input class="game__input visually-hidden" type="checkbox" name="answer" value="${answer.artist}" id="answer-${index + 1}">
+        <label class="game__check" for="answer-${index + 1}">Отметить</label>
       </div>
-    </header>`;
+    </div>`).join('')}
 
-const screenBody = ((question) => `<section class="game__screen">
-      <h2 class="game__title">${question.title}</h2>
-      <form class="game__tracks">
-
-
-      ${question.answers.map((answer, index) =>
-        `<div class="track">
-          <button class="track__button track__button--play" type="button"></button>
-          <div class="track__status">
-            <audio></audio>
-          </div>
-          <div class="game__answer">
-            <input class="game__input visually-hidden" type="checkbox" name="answer" value="${answer.artist}" id="answer-${index + 1}">
-            <label class="game__check" for="answer-${index + 1}">Отметить</label>
-          </div>
-        </div>`).join('')}
-
-        <button class="game__submit button" type="submit">Ответить</button>
-      </form>
-    </section>
-  </section>`)(questions[7]);
-
-const selectGenreScreen = getElementFromTemplate(screenHeader + screenBody);
+    <button class="game__submit button" type="submit">Ответить</button>
+  </form>
+  </section>
+</section>`;
 
 /**
  * Функция инициализации DOM-элементов игрового окна
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function initScreenSelectGenre(container) {
+function initScreen(container) {
   const form = container.querySelector('.game__tracks');
   const btnSubmit = container.querySelector('.game__submit');
   const selectBtns = [...container.querySelectorAll('.game__input')];
-  const backBtn = container.querySelector('.game__back');
 
   // до выбора хотябы одной песни кнопка ответа отключена
   btnSubmit.disabled = true;
@@ -72,19 +42,8 @@ function initScreenSelectGenre(container) {
   form.addEventListener('click', onSelectBtnClick);
   // обработчки "Ответа"
   form.addEventListener('submit', onFormSubmit);
-  // обработчик перезапуска игры
-  backBtn.addEventListener('click', onBackBtnClick);
 
   return container;
-
-  /**
-   * Обработчик клика на кнопку начала игры заново
-   * @param {object} evt - объект события клика на кнопку
-   */
-  function onBackBtnClick(evt) {
-    evt.preventDefault();
-    startGame();
-  }
 
   /**
    * Обработчик клика кнопки выбора песен, соответствующих жанру
@@ -122,7 +81,7 @@ function initScreenSelectGenre(container) {
     }
 
     // иначе показываем следующий игровой экран
-    showGameScreen(screenSelectArtist);
+    nextLevel();
   }
 
   /**
@@ -137,4 +96,4 @@ function initScreenSelectGenre(container) {
   }
 }
 
-export default {container: selectGenreScreen, initFunction: initScreenSelectGenre};
+export default {template: screen, initFunction: initScreen};
