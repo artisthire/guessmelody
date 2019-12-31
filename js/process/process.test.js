@@ -6,28 +6,28 @@ import {gameLife, levelSpeed} from './process.js';
 
 describe('Тестирование функции управления жизнями', function () {
   beforeEach(function () {
-    gameLife.life = initConfig.life;
+    gameLife.life = initConfig.lifes;
   });
 
-  it(`Должно быть ${initConfig.life} в начальном состоянии`, function () {
-    assert.equal(gameLife.life, initConfig.life);
+  it(`Должно быть ${initConfig.lifes} в начальном состоянии`, function () {
+    assert.equal(gameLife.life, initConfig.lifes);
   });
 
-  it(`Должно быть ${initConfig.life - 1} когда использована 1 жизнь`, function () {
-    gameLife.decrement();
-    assert.equal(gameLife.life, initConfig.life - 1);
+  it(`Должно быть ${initConfig.lifes - 1} когда использована 1 жизнь`, function () {
+    gameLife.remove();
+    assert.equal(gameLife.life, initConfig.lifes - 1);
   });
 
   it(`Должно быть 0 когда использована последняя жизнь`, function () {
-    for (let i = initConfig.life; i > 0; i--) {
-      gameLife.decrement();
+    for (let i = initConfig.lifes; i > 0; i--) {
+      gameLife.remove();
     }
     assert.equal(gameLife.life, 0);
   });
 
   it(`Должно быть -1 когда превышено колличество попыток`, function () {
-    for (let i = initConfig.life; i >= 0; i--) {
-      gameLife.decrement();
+    for (let i = initConfig.lifes; i >= 0; i--) {
+      gameLife.remove();
     }
     assert.equal(gameLife.life, -1);
   });

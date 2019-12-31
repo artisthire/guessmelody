@@ -11,7 +11,7 @@ const QUICK_RATIO = statisticConfig.quickRatio;
 const CORRECT_RATIO = statisticConfig.correctRatio;
 const FAIL_RATIO = statisticConfig.failRatio;
 // количество возможных ошибок (нот)
-const TOTAL_NOTES = initConfig.lifes;
+const TOTAL_LIFES = initConfig.lifes;
 const TOTAL_QUESTION = initConfig.questions;
 
 /**
@@ -19,10 +19,10 @@ const TOTAL_QUESTION = initConfig.questions;
  * @param {array} answers - массив ответов и затраченного времени на каждый вопрос. Упорядочен последовательно по порядку вопросов
  *  каждый объект внутри массива содержит результат во вопросу в виде:
  *  [{result: true|false (правильный/неправильный ответ), time: {number} (секунд затраченных на ответ)}]
- * @param {number} notes - количество оставшихся жизней (в игре отображаются как "ноты")
+ * @param {number} lifes - количество оставшихся жизней
  * @return {number} - количество набраных баллов
  */
-export function calcUserResult(answers, notes) {
+export function calcUserResult(answers, lifes) {
 
   if (answers.length < TOTAL_QUESTION) {
     return -1;
@@ -30,7 +30,7 @@ export function calcUserResult(answers, notes) {
 
   let quickAnswer = answers.reduce((sum, answer) => sum + ((answer.time < LIMIT_TIME) ? 1 : 0), 0);
 
-  const rezult = quickAnswer * QUICK_RATIO + (TOTAL_QUESTION - quickAnswer) * CORRECT_RATIO + (TOTAL_NOTES - notes) * FAIL_RATIO;
+  const rezult = quickAnswer * QUICK_RATIO + (TOTAL_QUESTION - quickAnswer) * CORRECT_RATIO + (TOTAL_LIFES - lifes) * FAIL_RATIO;
 
   return rezult;
 }

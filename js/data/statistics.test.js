@@ -1,59 +1,44 @@
-import {getRandomIntInclusive} from '../utilities.js';
 import {assert} from 'chai';
 
 import {calcUserResult, getGameResult, updateRatings, getUserRating} from './statistics.js';
 
 describe('Проверка функции подсчета статистики', function () {
 
-  /**
- * Функция используется для генерации фальшивых результатов игры, в целях тестирования
- * @param {number} successAnswer - колличество правильных ответов
- * @param {number} fastAnswer - колличество быстрых ответов
- * @param {number} totalAnswers - общее колличество ответов, которые дал пользователей. По-умолчанию = 10
- * @return {object} - объект с массивом результатов игры
- *  [{result: true|false (правильный/неправильный ответ), time: {number} (секунд затраченных на ответ)}]
- */
-  function getFakeAnswers(successAnswer, fastAnswer, totalAnswers = 10) {
-    let answers = [];
-    const FAST_TIME = 20 * 1000;
-    const LOW_TIME = 40 * 1000;
-
-    for (let i = totalAnswers; i--;) {
-      answers.push({result: false, time: LOW_TIME});
-    }
-
-    const createArray = (length) => Array.from({length}, (v, k) => k);
-    const shuffle = (array) => array.sort(() => Math.random() - 0.5);
-
-    const trueAnswerIndexes = shuffle(createArray(totalAnswers)).slice(0, successAnswer);
-    const fastAnswerIndexes = shuffle(createArray(totalAnswers)).slice(0, fastAnswer);
-
-    for (let indexTrue of trueAnswerIndexes) {
-      answers[indexTrue].result = true;
-    }
-
-    for (let indexFast of fastAnswerIndexes) {
-      answers[indexFast].time = FAST_TIME;
-    }
-
-    return answers;
-  }
-
   it('Должно быть -1, когда пользователь не успел ответить на все вопросы', function () {
-    assert.equal(-1, calcUserResult(getFakeAnswers(5, 0, 8), 2));
-    assert.equal(-1, calcUserResult(getFakeAnswers(2, 2, 5), 2));
+    const fakeResults = [
+      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': false, 'time': 40000}, {'result': true, 'time': 40000},
+      {'result': true, 'time': 40000}, {'result': false, 'time': 40000}, {'result': false, 'time': 40000}, {'result': true, 'time': 40000},
+    ];
+
+    assert.equal(-1, calcUserResult(fakeResults, 3));
   });
 
   it('Должно быть 10, когда ответы правильные но медленные', function () {
-    assert.equal(10, calcUserResult(getFakeAnswers(10, 0), 2));
+    const fakeResults = [
+      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
+      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
+      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}
+    ];
+
+    assert.equal(10, calcUserResult(fakeResults, 3));
   });
 
-  for (let i = 1; i <= 9; i = i + getRandomIntInclusive(1, 2)) {
-    let notes = getRandomIntInclusive(0, 2);
-    it(`Должно быть ${i * 2 + (10 - i) + (2 - notes) * -2}, когда ${i} быстрых ответов и осталось ${notes} жизней`, function () {
-      assert.equal(i * 2 + (10 - i) + (2 - notes) * -2, calcUserResult(getFakeAnswers(10, i), notes));
-    });
-  }
+  it(`Должно быть 11 когда 5 быстрых ответов и осталось 1 жизнь`, function () {
+    const fastAnswer = 5;
+    const lastLifes = 1;
+    const totalQuestion = 10;
+    const totalLifes = 3;
+    const fastRation = 2;
+    const normalRatio = 1;
+    const failRatio = -2;
+    const fakeResult = [
+      {'result': true, 'time': 20000}, {'result': true, 'time': 40000}, {'result': true, 'time': 20000}, {'result': true, 'time': 40000},
+      {'result': true, 'time': 20000}, {'result': true, 'time': 20000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
+      {'result': true, 'time': 40000}, {'result': true, 'time': 20000}
+    ];
+
+    assert.equal(fastAnswer * fastRation + (totalQuestion - fastAnswer) * normalRatio + (totalLifes - lastLifes) * failRatio, calcUserResult(fakeResult, lastLifes));
+  });
 });
 
 describe('Проверка функции выбода результата игры', function () {

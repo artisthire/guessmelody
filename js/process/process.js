@@ -10,7 +10,7 @@ export const gameLife = {
     this.currentLife = count;
   },
   remove() {
-    if (this.currentLife <= 0) {
+    if (this.currentLife < 0) {
       return -1;
     }
 
