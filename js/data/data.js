@@ -7,7 +7,8 @@ import staticGameData from './game-static-data.js';
 // в statistics добавляются результаты ответов по каждому уровню
 export const gameState = {
   level: 0,
-  lifes: 3,
+  wrongAnswer: 0,
+  lastTime: 5 * 60 * 1000,
   statistics: []
 };
 

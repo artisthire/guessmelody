@@ -1,17 +1,14 @@
 /**
  * Модуль управления переключением игровых экранов
  */
-import screenWelcom from './templates/welcome.js';
-
-import levelHeader from './templates/level-header.js';
-import selectArtistLevel from './templates/game-artist.js';
-import selectGenreLevel from './templates/game-genre.js';
+import getScreenWelcome from './templates/welcome.js';
+import getLevelScreen from './templates/level-screen.js';
 
 import screenResultSuccess from './templates/result-success.js';
 import screenFailTime from './templates/fail-time.js';
 import screenFailTries from './templates/fail-tries.js';
 
-import {getElementFromTemplate, getRandomIntInclusive} from './utilities.js';
+import {getRandomIntInclusive} from './utilities.js';
 import {gameState, questions} from './data/data.js';
 import {initConfig} from './data/config.js';
 
@@ -36,25 +33,11 @@ export function showGameScreen(screen) {
 }
 
 // Должна заменить showGameScreen
-function renderScreen(container, data, screen) {
-  const template = screen.template(data);
-  const element = getElementFromTemplate(template);
-  // клонируем для того, поскольку вставка на страницу выймет элементы из переданного объекта screen
-  // клонируем перед инициализацией, чтобы обработчики событий применились именно к клону
-  let clone = element.cloneNode(true);
-  // выполнить инициализацию элементов внутри внеменного контейнера
-  clone = screen.initFunction(clone);
-  const children = [...clone.children];
+function renderScreen(element, container = screensContainer) {
   // обновить содержимое общего контейнера для игровых окон
-  container.append(...children);
-
-  return children;
+  container.textContent = '';
+  container.append(...element.children);
 }
-
-// хранит ссылки на элементы с разметкой вопроса на предыдущем уровне игры
-// обновляется при переключении уровней
-let previousLevelElements = null;
-let levelContainer = null;
 
 export function nextLevel() {
   // получаем номер уровня игры
@@ -62,7 +45,7 @@ export function nextLevel() {
 
   // если все уровни игры пройдены
   if (levelIndex >= questions.length) {
-    // временно отображается случайное окно с выиграшем или проиграшем
+    // TODO: доделать получения окна с результатами на основе итогов игры
     showGameScreen(getRandomResultScreen());
     return;
   }
@@ -72,23 +55,7 @@ export function nextLevel() {
   // получаем данные по вопросу для текущего уровня
   const question = questions[levelIndex];
 
-  // если это первый уровень, добавляем разметку для общего заголовка всех уровней
-  if (levelIndex === initConfig.initLevel) {
-    clearGameScreen();
-    // контейнер, куда будут записываться вопросы для текущего уровня
-    levelContainer = renderScreen(screensContainer, gameState, levelHeader)[0];
-  } else if (previousLevelElements) {
-    // если уровень не первый удаляем все элементы связанные с разметкой вопроса (без элементов общего заголовка уровней)
-    // т.к. общий заголовок останется, а будет меняться только разметка вопроса с вариантами ответов
-    previousLevelElements.forEach((element) => element.remove());
-  }
-
-  // в зависимости от типа игрового уровня, отображаем вопрос
-  if (question.type === 'artist') {
-    previousLevelElements = renderScreen(levelContainer, question, selectArtistLevel);
-  } else {
-    previousLevelElements = renderScreen(levelContainer, question, selectGenreLevel);
-  }
+  renderScreen(getLevelScreen(gameState, question));
 }
 
 function clearGameScreen() {
@@ -100,10 +67,12 @@ function clearGameScreen() {
  */
 export function startGame() {
   gameState.level = initConfig.initLevel;
-  gameState.lifes = initConfig.lifes;
+  gameState.currentTime = initConfig.totalTime;
+  gameState.wrongAnswer = 0;
+  gameState.statistics = [];
 
   clearGameScreen();
-  renderScreen(screensContainer, null, screenWelcom);
+  renderScreen(getScreenWelcome());
 }
 
 

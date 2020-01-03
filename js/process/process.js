@@ -2,7 +2,7 @@ import {initConfig, statisticConfig} from '../data/config.js';
 
 // управление колличеством игровых жизней
 export const gameLife = {
-  currentLife: initConfig.lifes,
+  currentLife: initConfig.tries,
   get life() {
     return this.currentLife;
   },

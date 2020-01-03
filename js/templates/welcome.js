@@ -2,9 +2,10 @@
  * Модуль шаблона разметки для стартового окна
  */
 import {nextLevel} from '../controller.js';
+import {getElementFromTemplate} from '../utilities.js';
 
 // шаблон игрового окна
-const welcomTemplate = () => `<section class="welcome">
+const welcomTemplate = `<section class="welcome">
     <div class="welcome__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     <button class="welcome__button"><span class="visually-hidden">Начать игру</span></button>
     <h2 class="welcome__rules-title">Правила игры</h2>
@@ -21,7 +22,7 @@ const welcomTemplate = () => `<section class="welcome">
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
-function initScreen(container) {
+function initScreenWelcome(container) {
   const playBtn = container.querySelector('.welcome__button');
 
   // при клике на кнопку "Играть" показать первый экран игры
@@ -39,4 +40,9 @@ function initScreen(container) {
   return container;
 }
 
-export default {template: welcomTemplate, initFunction: initScreen};
+export default function getScreenWelcome() {
+  let screenWelcomeElement = getElementFromTemplate(welcomTemplate);
+  screenWelcomeElement = initScreenWelcome(screenWelcomeElement);
+
+  return screenWelcomeElement;
+}
