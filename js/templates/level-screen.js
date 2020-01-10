@@ -1,5 +1,4 @@
 import {startGame, nextLevel} from '../controller.js';
-import {initConfig} from '../data/config.js';
 import {getElementFromTemplate} from '../utilities.js';
 
 const headerTemplate = (state) => {
@@ -72,7 +71,7 @@ const selectGenreTemplate = (question) => `<section class="game__screen">
       </div>
     </div>`).join('')}
 
-    <button class="game__submit button" type="submit">Ответить</button>
+    <button class="game__submit button" type="submit" disabled>Ответить</button>
   </form>
   </section>
 </section>`;
@@ -108,8 +107,10 @@ function initHeaderTemplate(container) {
 function initSelectArtistTemplate(container) {
   const form = container.querySelector('.game__artist');
   const selectBtns = [...container.querySelectorAll('.artist__input')];
+  // будет содержать индексы выбранных ответов
+  let selectedAnswerIndexes = [];
 
-  // при клике на любую из кнопок ответов, показать окно с результатом игры
+  // при клике на любую из кнопок ответов, выбор ответа подтверждается автоматически
   form.addEventListener('click', onSelectBtnClick);
 
   return container;
@@ -125,7 +126,9 @@ function initSelectArtistTemplate(container) {
       return;
     }
 
-    nextLevel();
+    selectedAnswerIndexes = getSelectedAnswerIdexes(selectBtns);
+
+    nextLevel(selectedAnswerIndexes);
   }
 }
 
@@ -138,9 +141,8 @@ function initSelectGenreTemplate(container) {
   const form = container.querySelector('.game__tracks');
   const btnSubmit = container.querySelector('.game__submit');
   const selectBtns = [...container.querySelectorAll('.game__input')];
-
-  // до выбора хотябы одной песни кнопка ответа отключена
-  btnSubmit.disabled = true;
+  // будет содержать индексы выбранных ответов
+  let selectedAnswerIndexes = [];
 
   // обработчик по клику на одну из кнопок выбора песни
   form.addEventListener('click', onSelectBtnClick);
@@ -162,14 +164,10 @@ function initSelectGenreTemplate(container) {
       return;
     }
 
-    // если не выбран ни одина из песен, на следующий экран не переходим
-    if (!getSelectedGenres().length) {
-      btnSubmit.disabled = true;
-      return;
-    }
+    selectedAnswerIndexes = getSelectedAnswerIdexes(selectBtns);
 
-    // иначе разрешаем нажать кнопку "Ответ" и перейти на следующий игровой экран
-    btnSubmit.disabled = false;
+    // разрешаем нажать кнопку "Ответ" если выбран хотябы один из ответов
+    btnSubmit.disabled = !selectedAnswerIndexes.length;
   }
 
   /**
@@ -180,24 +178,28 @@ function initSelectGenreTemplate(container) {
     evt.preventDefault();
 
     // если не выбрана ни одна из песен, ничего не делаем
-    if (!getSelectedGenres().length) {
+    if (!selectedAnswerIndexes.length) {
       return;
     }
 
     // иначе показываем следующий игровой экран
-    nextLevel();
+    nextLevel(selectedAnswerIndexes);
   }
+}
 
-  /**
-   * Функция, которая возвращает все выбранные игроком песни
-   * @return {array} evt - массив DOM-элементов checkbox-сов выбранных песен
-   */
-  function getSelectedGenres() {
-    // найти все выбранные жанры
-    const checkedSelectBtns = selectBtns.filter((checkbox) => checkbox.checked);
+/**
+ * Возвращает массив порядковых номеров (индексов) из общего списка вариантов ответов, которые были выбранны пользователем
+ * @param {array} selectBtns - массив DOM-элеметов чекбоксов или радиокнопок, представляющих варианты ответов
+ * @return {array} - числовой массив с индексами элементов, которые были выбраны пользователем
+ */
+function getSelectedAnswerIdexes(selectBtns) {
+  return selectBtns.reduce((indexes, btn, index) => {
+    if (btn.checked) {
+      indexes.push(index);
+    }
 
-    return checkedSelectBtns;
-  }
+    return indexes;
+  }, []);
 }
 
 export default function getLevelScreen(gameState, levelQuestion) {

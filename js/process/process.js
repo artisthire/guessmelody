@@ -1,4 +1,5 @@
 import {initConfig, statisticConfig} from '../data/config.js';
+import {gameState, levelResult} from '../data/data.js';
 
 // управление колличеством игровых жизней
 export const gameLife = {
@@ -27,3 +28,26 @@ export const levelSpeed = {
     return (new Date().getTime() - this.startTime) <= statisticConfig.limitTime;
   }
 };
+
+function saveAnswerStatistic(selectedAnswerIndexes, levelTime, levelAnswers) {
+  const selectedAnswers = selectedAnswerIndexes.map((answerIndex) => levelAnswers[answerIndex]);
+
+  const currentLevelResult = Object.assign({}, levelResult);
+  currentLevelResult.answers = selectedAnswers;
+  currentLevelResult.time = levelTime;
+
+  gameState.statistics.push(currentLevelResult);
+
+  return currentLevelResult.answers;
+}
+
+function checkUserAnswers(selectedAnswers) {
+  const hasWrongAnswer = !!selectedAnswers.find((answer) => !answer.isCorrect);
+
+  return hasWrongAnswer;
+}
+
+export function updateGameState(selectedAnswerIndexes, levelTime, levelAnswers) {
+  const selectedAnswers = saveAnswerStatistic(selectedAnswerIndexes, levelTime, levelAnswers);
+  return checkUserAnswers(selectedAnswers);
+}

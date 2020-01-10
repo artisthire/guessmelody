@@ -27,6 +27,12 @@ const resultSuccesTemplate = () => `<section class="result">
     <button class="result__replay" type="button">Сыграть ещё раз</button>
   </section>`;
 
+const resultSreens = {
+  failTime: failTimeTemplate,
+  failTries: failTriesTemplate,
+  success: resultSuccesTemplate
+}
+
 /**
  * Функция инициализации обработчиков окна результатов игры
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
@@ -50,21 +56,10 @@ function initResultScreen(container) {
 }
 
 // TODO: доделать передачу окна результата в контроллер
-export default function getResultScreen(gameState, statistics, totalQuestions) {
-  let resultScreenTemplate = null;
-
-  // в зависимости от коллечества ответов добавленных в статистику и величины оставшегося времени
-  // определеяем какой из окон результатов показывать
-  if (statistics.length === totalQuestions && gameState.lastTime > 0) {
-    resultScreenTemplate = resultSuccesTemplate();
-  } else if (statistics.length !== totalQuestions && gameState.lastTime > 0) {
-    resultScreenTemplate = failTriesTemplate();
-  } else {
-    resultScreenTemplate = failTimeTemplate();
-  }
+export default function getResultScreen(screenType, statistics) {
 
   // получаем и инициализируем DOM-элемент с результатом игры
-  let resultScreenElement = getElementFromTemplate(resultScreenTemplate);
+  let resultScreenElement = getElementFromTemplate(resultSreens[screenType](statistics));
   resultScreenElement = initResultScreen(resultScreenElement);
 
   return resultScreenElement;

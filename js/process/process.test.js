@@ -26,7 +26,7 @@ describe('Тестирование функции управления жизн�
   });
 
   it(`Должно быть -1 когда превышено колличество попыток`, function () {
-    for (let i = initConfig.tries; i >= 0; i--) {
+    for (let i = (initConfig.tries + 1); i > 0; i--) {
       gameLife.remove();
     }
     assert.equal(gameLife.life, -1);

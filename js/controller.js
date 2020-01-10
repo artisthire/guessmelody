@@ -3,14 +3,12 @@
  */
 import getScreenWelcome from './templates/welcome.js';
 import getLevelScreen from './templates/level-screen.js';
+import getResultScreen from './templates/result.js';
 
-import screenResultSuccess from './templates/result-success.js';
-import screenFailTime from './templates/fail-time.js';
-import screenFailTries from './templates/fail-tries.js';
-
-import {getRandomIntInclusive} from './utilities.js';
 import {gameState, questions} from './data/data.js';
 import {initConfig} from './data/config.js';
+
+import {updateGameState} from './process/process.js';
 
 // контейнер, в котором отображаются все игровые окна
 const screensContainer = document.querySelector('.main');
@@ -39,23 +37,29 @@ function renderScreen(element, container = screensContainer) {
   container.append(...element.children);
 }
 
-export function nextLevel() {
+export function nextLevel(selectedAnswerIndexes) {
   // получаем номер уровня игры
   const levelIndex = gameState.level;
 
-  // если все уровни игры пройдены
-  if (levelIndex >= questions.length) {
+  // если получены результаты ответов пользователя
+  if (selectedAnswerIndexes) {
+    console.log(updateGameState(selectedAnswerIndexes, 40 * 1000, questions[levelIndex - 1].answers));
+    console.log(gameState);
+  }
+
+  // если достигнут последний уровень игры
+  if (levelIndex === questions.length) {
     // TODO: доделать получения окна с результатами на основе итогов игры
-    showGameScreen(getRandomResultScreen());
+    renderScreen(getResultScreen('success', gameState.statistics));
     return;
   }
 
-  // увеличиваем номер текущего уровня
-  gameState.level++;
   // получаем данные по вопросу для текущего уровня
   const question = questions[levelIndex];
-
+  // отображаем текущий уровень игры
   renderScreen(getLevelScreen(gameState, question));
+  // устанавливаем номер следующего уровня
+  gameState.level++;
 }
 
 function clearGameScreen() {
@@ -67,23 +71,10 @@ function clearGameScreen() {
  */
 export function startGame() {
   gameState.level = initConfig.initLevel;
-  gameState.currentTime = initConfig.totalTime;
+  gameState.lastTime = initConfig.totalTime;
   gameState.wrongAnswer = 0;
   gameState.statistics = [];
 
   clearGameScreen();
   renderScreen(getScreenWelcome());
 }
-
-
-/**
- * Временная функция, возвращающая одно случайное окно: выиграш, проиграш по времени или по попыткам
- * @return {object} - шаблон с разметкой для случайного окна результата игры
- */
-function getRandomResultScreen() {
-  const resultScreens = [screenResultSuccess, screenFailTime, screenFailTries];
-
-  return resultScreens[getRandomIntInclusive(0, resultScreens.length - 1)];
-}
-
-
