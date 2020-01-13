@@ -2,34 +2,31 @@ import {assert} from 'chai';
 import sinon from '../../node_modules/sinon/pkg/sinon-esm.js';
 
 import {initConfig, statisticConfig} from '../data/config.js';
-import {gameLife, levelSpeed} from './process.js';
+import {gameState} from '../data/data.js';
+import {removeGameLife, levelSpeed} from './process.js';
 
 describe('Тестирование функции управления жизнями', function () {
   beforeEach(function () {
-    gameLife.life = initConfig.tries;
+    gameState.wrongAnswer = 0;
   });
 
-  it(`Должно быть ${initConfig.tries} в начальном состоянии`, function () {
-    assert.equal(gameLife.life, initConfig.tries);
+  it(`Должно быть 1 когда допущена 1 ошибка`, function () {
+    removeGameLife();
+    assert.equal(gameState.wrongAnswer, 1);
   });
 
-  it(`Должно быть ${initConfig.tries - 1} когда использована 1 жизнь`, function () {
-    gameLife.remove();
-    assert.equal(gameLife.life, initConfig.tries - 1);
-  });
-
-  it(`Должно быть 0 когда использована последняя жизнь`, function () {
-    for (let i = initConfig.tries; i > 0; i--) {
-      gameLife.remove();
+  it(`Должно быть 3 когда использована последняя жизнь`, function () {
+    for (let i = initConfig.totalTries; i > 0; i--) {
+      removeGameLife();
     }
-    assert.equal(gameLife.life, 0);
+    assert.equal(gameState.wrongAnswer, 3);
   });
 
   it(`Должно быть -1 когда превышено колличество попыток`, function () {
-    for (let i = (initConfig.tries + 1); i > 0; i--) {
-      gameLife.remove();
+    for (let i = (initConfig.totalTries + 1); i > 0; i--) {
+      removeGameLife();
     }
-    assert.equal(gameLife.life, -1);
+    assert.equal(gameState.wrongAnswer, -1);
   });
 });
 

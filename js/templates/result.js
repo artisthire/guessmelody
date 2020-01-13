@@ -19,7 +19,7 @@ const failTriesTemplate = () => `<section class="result">
   </section>`;
 
 // Шаблон разметки окна выиграша
-const resultSuccesTemplate = () => `<section class="result">
+const gameCompleteTemplate = () => `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     <h2 class="result__title">Вы настоящий меломан!</h2>
     <p class="result__total">За 3 минуты и 25 секунд вы набрали 12 баллов (8 быстрых), совершив 3 ошибки</p>
@@ -30,8 +30,8 @@ const resultSuccesTemplate = () => `<section class="result">
 const resultSreens = {
   failTime: failTimeTemplate,
   failTries: failTriesTemplate,
-  success: resultSuccesTemplate
-}
+  gameComplete: gameCompleteTemplate
+};
 
 /**
  * Функция инициализации обработчиков окна результатов игры

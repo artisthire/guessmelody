@@ -11,7 +11,7 @@ const QUICK_RATIO = statisticConfig.quickRatio;
 const CORRECT_RATIO = statisticConfig.correctRatio;
 const FAIL_RATIO = statisticConfig.failRatio;
 // количество возможных ошибок (нот)
-const TOTAL_LIFES = initConfig.lifes;
+const TOTAL_LIFES = initConfig.totalTries;
 const TOTAL_QUESTION = initConfig.questions;
 
 /**
