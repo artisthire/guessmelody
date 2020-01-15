@@ -9,6 +9,7 @@ export const gameState = {
   level: 0,
   wrongAnswer: 0,
   lastTime: 5 * 60 * 1000,
+  gameEndCode: 0,
   statistics: []
 };
 

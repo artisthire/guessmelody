@@ -1,47 +1,60 @@
 import {assert} from 'chai';
 
 import {calcUserResult, getGameResult, updateRatings, getUserRating} from './statistics.js';
+import {statisticConfig} from './config.js';
 
 describe('Проверка функции подсчета статистики', function () {
 
-  it('Должно быть -1, когда пользователь не успел ответить на все вопросы', function () {
-    const fakeResults = [
-      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': false, 'time': 40000}, {'result': true, 'time': 40000},
-      {'result': true, 'time': 40000}, {'result': false, 'time': 40000}, {'result': false, 'time': 40000}, {'result': true, 'time': 40000},
-    ];
-
-    assert.equal(-1, calcUserResult(fakeResults, 3));
-  });
-
   it('Должно быть 10, когда ответы правильные но медленные', function () {
     const fakeResults = [
-      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
-      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
-      {'result': true, 'time': 40000}, {'result': true, 'time': 40000}
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}
     ];
 
-    assert.equal(10, calcUserResult(fakeResults, 3));
+    assert.equal(10, calcUserResult(fakeResults, 0, 10));
   });
 
-  it(`Должно быть 11 когда 5 быстрых ответов и осталось 1 жизнь`, function () {
+  // для подсчета результата игры массива ответов пользователя в целях тестирования
+  function getFakeUserResult(fastAnswer, wrongAnswer, totalQuestion) {
+    const quickRation = statisticConfig.quickRatio;
+    const normalRatio = statisticConfig.correctRatio;
+    const failRatio = statisticConfig.failRatio;
+
+    return fastAnswer * quickRation + (totalQuestion - fastAnswer) * normalRatio + wrongAnswer * failRatio;
+  }
+
+  it(`Должно быть ${getFakeUserResult(5, 2, 10)} когда 5 быстрых ответов и 2 ошибка`, function () {
     const fastAnswer = 5;
-    const lastLifes = 1;
+    const wronAnswer = 2;
     const totalQuestion = 10;
-    const totalLifes = 3;
-    const fastRation = 2;
-    const normalRatio = 1;
-    const failRatio = -2;
-    const fakeResult = [
-      {'result': true, 'time': 20000}, {'result': true, 'time': 40000}, {'result': true, 'time': 20000}, {'result': true, 'time': 40000},
-      {'result': true, 'time': 20000}, {'result': true, 'time': 20000}, {'result': true, 'time': 40000}, {'result': true, 'time': 40000},
-      {'result': true, 'time': 40000}, {'result': true, 'time': 20000}
+
+    let fakeResult = [
+      {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 20000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}
     ];
 
-    assert.equal(fastAnswer * fastRation + (totalQuestion - fastAnswer) * normalRatio + (totalLifes - lastLifes) * failRatio, calcUserResult(fakeResult, lastLifes));
+    assert.equal(getFakeUserResult(fastAnswer, wronAnswer, totalQuestion), calcUserResult(fakeResult, wronAnswer, totalQuestion));
+  });
+
+  it(`Должно быть ${getFakeUserResult(2, 1, 10)} когда 2 быстрых ответов и 1 ошибка`, function () {
+    const fastAnswer = 2;
+    const wronAnswer = 1;
+    const totalQuestion = 10;
+
+
+    let fakeResult = [
+      {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
+      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}
+    ];
+
+    assert.equal(getFakeUserResult(fastAnswer, wronAnswer, totalQuestion), calcUserResult(fakeResult, wronAnswer, totalQuestion));
   });
 });
 
-describe('Проверка функции выбода результата игры', function () {
+describe.skip('Проверка функции выбода результата игры', function () {
 
   it('Должен быть проигрыш, когда закончились попытки', function () {
     assert.match(getGameResult([11, 10, 8, 5, 4], {result: 8, lastLive: 0, lastTime: 50}), /попытки/);
@@ -71,24 +84,49 @@ describe('Проверка функции выбода результата иг
   });
 });
 
-describe('Проверка функции добавления рейтинга пользователя в общий рейтинг', function () {
+describe('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
 
-  it('Результат игрока должен добавляться в общий рейтинг игроков', function () {
-    assert.deepInclude(updateRatings([11, 8, 5, 4], 10), 10);
-    assert.deepInclude(updateRatings([11, 8, 5, 4], 6), 6);
-  });
+  (function () {
+    let mockStorage = {};
+    mockStorage.setItem = function (key, val) {
+      this[key] = val + '';
+    };
+    mockStorage.getItem = function (key) {
+      if (key in this) {
+        return this[key];
+      }
+      return null;
+    };
+    Object.defineProperty(mockStorage, 'length', {
+      get() {
+        return Object.keys(this).length - 2;
+      }
+    });
 
-  it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
-    assert.deepEqual(updateRatings([11, 10, 8, 5, 4], 10), [11, 10, 8, 5, 4]);
-    assert.deepEqual(updateRatings([11, 10, 8, 5, 4], 4), [11, 10, 8, 5, 4]);
-  });
 
-  it('Общий рейтинг отсортирован по убыванию', function () {
-    assert.sameOrderedMembers(updateRatings([11, 10, 8, 5, 4], 6), [11, 10, 8, 6, 5, 4]);
-    assert.sameOrderedMembers(updateRatings([15, 10, 8, 5, 4], 12), [15, 12, 10, 8, 5, 4]);
-    assert.sameOrderedMembers(updateRatings([11, 10, 8, 5, 4], 12), [12, 11, 10, 8, 5, 4]);
-    assert.sameOrderedMembers(updateRatings([11, 10, 8, 5, 4], 3), [11, 10, 8, 5, 4, 3]);
-  });
+    global.localStorage = mockStorage;
+
+    it('Если нет других результатов, должен создаваться новый рейтинг', function () {
+      assert.deepEqual(updateRatings(10), [10]);
+    });
+
+    it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
+      updateRatings(11);
+      updateRatings(8);
+
+      assert.deepEqual(updateRatings(10), [11, 10, 8]);
+    });
+
+    it('Если рейтинга текущего пользователя в общем массиве нет, он должен в него добавляться', function () {
+      assert.deepEqual(updateRatings(7), [11, 10, 8, 7]);
+    });
+
+    it('Общий рейтинг отсортирован по убыванию', function () {
+      assert.sameOrderedMembers(updateRatings(7), [11, 10, 8, 7]);
+    });
+
+  })();
+
 });
 
 // Для тестирования внутренней функции подсчета рейтинга пользователя

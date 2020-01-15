@@ -25,6 +25,7 @@ function renderScreen(element, container = screensContainer) {
 }
 
 export function nextLevel(selectedAnswerIndexes) {
+
   // получаем номер уровня игры
   const levelIndex = gameState.level;
 
@@ -33,14 +34,13 @@ export function nextLevel(selectedAnswerIndexes) {
     const prevLevelAnswers = questions[levelIndex - 1].answers;
     saveAnswerStatistic(selectedAnswerIndexes, 40 * 1000, prevLevelAnswers);
 
+    // проверяем, были ли допушены ошибки в ответах на предыдущем уровне игры
     if (checkWrongAnswer(selectedAnswerIndexes, prevLevelAnswers)) {
       removeGameLife();
     }
 
-    const gameEndStatus = checkGameEndStatus();
-
-    if (gameEndStatus !== '') {
-      renderScreen(getResultScreen(gameEndStatus, gameState.statistics));
+    // если игра успешно или неуспешно окончена, не переключаемся на следующий уровень
+    if (checkGameEndStatus() !== 0) {
       return;
     }
   }
@@ -61,6 +61,7 @@ export function startGame() {
   gameState.lastTime = initConfig.totalTime;
   gameState.wrongAnswer = 0;
   gameState.statistics = [];
+  gameState.gameEndCode = initConfig.gameEndCode['run'];
 
   screensContainer.textContent = '';
   renderScreen(getScreenWelcome());
@@ -70,16 +71,19 @@ export function startGame() {
 function checkGameEndStatus() {
 
   if (gameState.wrongAnswer === -1) {
-    return 'failTries';
+    gameState.gameEndCode = initConfig.gameEndCode['failTries'];
+    renderScreen(getResultScreen('failTries'));
   }
 
   if (gameState.lastTime <= 0) {
-    return 'failTime';
+    gameState.gameEndCode = initConfig.gameEndCode['failTime'];
+    renderScreen(getResultScreen('failTime'));
   }
 
   if (gameState.level === questions.length) {
-    return 'gameComplete';
+    gameState.gameEndCode = initConfig.gameEndCode['complete'];
+    renderScreen(getResultScreen('gameComplete', gameState.statistics));
   }
 
-  return '';
+  return gameState.gameEndCode;
 }
