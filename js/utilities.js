@@ -25,3 +25,13 @@ export function getRandomIntInclusive(min = 0, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min; // Максимум и минимум включаются
 }
+
+export function getTimeComponents(time) {
+  const date = new Date();
+  date.setTime(time);
+  const timeComponents = date.toLocaleTimeString('en-US', {hour12: false}).split(':');
+  const minuts = timeComponents[1];
+  const seconds = timeComponents[2];
+
+  return [minuts, seconds];
+}

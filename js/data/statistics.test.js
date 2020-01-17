@@ -1,92 +1,107 @@
 import {assert} from 'chai';
 
-import {calcUserResult, getGameResult, updateRatings, getUserRating} from './statistics.js';
-import {statisticConfig} from './config.js';
+import {calcUserResult, getGameEndMessage, updateRatings, getUserRating} from './statistics.js';
+import {initConfig, statisticConfig} from './config.js';
 
 describe('Проверка функции подсчета статистики', function () {
-
-  it('Должно быть 10, когда ответы правильные но медленные', function () {
-    const fakeResults = [
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}
-    ];
-
-    assert.equal(10, calcUserResult(fakeResults, 0, 10));
-  });
-
   // для подсчета результата игры массива ответов пользователя в целях тестирования
-  function getFakeUserResult(fastAnswer, wrongAnswer, totalQuestion) {
+  function getFakeUserResult(quickAnswer, wrongAnswer, totalQuestions) {
     const quickRation = statisticConfig.quickRatio;
     const normalRatio = statisticConfig.correctRatio;
     const failRatio = statisticConfig.failRatio;
 
-    return fastAnswer * quickRation + (totalQuestion - fastAnswer) * normalRatio + wrongAnswer * failRatio;
+    return quickAnswer * quickRation + (totalQuestions - quickAnswer) * normalRatio + wrongAnswer * failRatio;
   }
 
-  it(`Должно быть ${getFakeUserResult(5, 2, 10)} когда 5 быстрых ответов и 2 ошибка`, function () {
-    const fastAnswer = 5;
-    const wronAnswer = 2;
-    const totalQuestion = 10;
+  it(`Должно быть ${getFakeUserResult(0, 0, 10)} баллов и 0 быстрых ответов, когда ответы правильные но медленные`, function () {
+    const quickAnswer = 0;
+    const wrongAnswer = 0;
+    const totalQuestions = 10;
 
-    let fakeResult = [
-      {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 20000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}
+    const fakeResults = [
+      {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000},
+      {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}
     ];
 
-    assert.equal(getFakeUserResult(fastAnswer, wronAnswer, totalQuestion), calcUserResult(fakeResult, wronAnswer, totalQuestion));
+    assert.deepEqual({quickAnswer, 'ball': getFakeUserResult(quickAnswer, wrongAnswer, totalQuestions)}, calcUserResult(fakeResults, wrongAnswer, totalQuestions));
   });
 
-  it(`Должно быть ${getFakeUserResult(2, 1, 10)} когда 2 быстрых ответов и 1 ошибка`, function () {
-    const fastAnswer = 2;
-    const wronAnswer = 1;
-    const totalQuestion = 10;
+  it(`Должно быть ${getFakeUserResult(5, 2, 10)} баллов и 5 быстрых ответов, когда 5 быстрых ответов и 2 ошибки`, function () {
+    const quickAnswer = 5;
+    const wrongAnswer = 2;
+    const totalQuestions = 10;
 
-
-    let fakeResult = [
-      {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 20000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000},
-      {'answers': [], 'time': 30000}, {'answers': [], 'time': 30000}
+    const fakeResults = [
+      {'time': 20000}, {'time': 20000}, {'time': 20000}, {'time': 30000}, {'time': 30000},
+      {'time': 20000}, {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}
     ];
 
-    assert.equal(getFakeUserResult(fastAnswer, wronAnswer, totalQuestion), calcUserResult(fakeResult, wronAnswer, totalQuestion));
+    assert.deepEqual({quickAnswer, 'ball': getFakeUserResult(quickAnswer, wrongAnswer, totalQuestions)}, calcUserResult(fakeResults, wrongAnswer, totalQuestions));
+  });
+
+  it(`Должно быть ${getFakeUserResult(2, 1, 10)} баллов и 2 быстрых ответа, когда 2 быстрых ответа и 1 ошибка`, function () {
+    const quickAnswer = 2;
+    const wrongAnswer = 1;
+    const totalQuestions = 10;
+
+    const fakeResults = [
+      {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000},
+      {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}
+    ];
+
+    assert.deepEqual({quickAnswer, 'ball': getFakeUserResult(quickAnswer, wrongAnswer, totalQuestions)}, calcUserResult(fakeResults, wrongAnswer, totalQuestions));
   });
 });
 
-describe.skip('Проверка функции выбода результата игры', function () {
+describe('Проверка функции выбода результата игры', function () {
+
+  before(function () {
+    // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
+    // связано с тем, что мы объявляем глобальный объект localStorage
+    localStorage['allRatings'] = '[]';
+  });
 
   it('Должен быть проигрыш, когда закончились попытки', function () {
-    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 8, lastLive: 0, lastTime: 50}), /попытки/);
-    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 5, lastLive: 0, lastTime: 50}), /попытки/);
+    assert.match(getGameEndMessage(initConfig.gameEndCode['failTries']), /попытки/);
   });
 
   it('Должен быть проигрыш, когда законилось время', function () {
-    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 9, lastLive: 1, lastTime: 0}), /Время/);
-    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 10, lastLive: 2, lastTime: 0}), /Время/);
+    assert.match(getGameEndMessage(initConfig.gameEndCode['failTime']), /Время/);
   });
 
-  it('Должен быть выигрыш, когда не закончились попытки и время', function () {
-    assert.match(getGameResult([11, 10, 8, 5, 4], {result: 10, lastLive: 1, lastTime: 20}), /место/);
+  it('Должен быть выигрыш, когда получены все ответы, не закончились попытки и время', function () {
+    const quickAnswer = 2;
+    const wrongAnswer = 1;
+    const totalQuestions = 10;
+    const lastTime = (3 * 60 + 25) * 1000;
+    const fakeResults = [
+      {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000},
+      {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}
+    ];
+
+    assert.match(getGameEndMessage(initConfig.gameEndCode['complete'], {statistics: fakeResults, wrongAnswer, totalQuestions, lastTime}), /меломан/);
   });
+
+  /*
 
   it('Должна правильно рассчитываться позиция игрока в общем рейтинге', function () {
-    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /1 место/);
-    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 10, lastLive: 1, lastTime: 20}), /5 место/);
-    assert.match(getGameResult([16, 17, 18, 15, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /4 место/);
+    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /1 место/);
+    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 10, lastLive: 1, lastTime: 20}), /5 место/);
+    assert.match(getGameEndMessage([16, 17, 18, 15, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /4 место/);
   });
 
   it('Должна правильно рассчитываться процент игроков с меньшим рейтингом', function () {
-    assert.match(getGameResult([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /83%/);
-    assert.match(getGameResult([20, 19, 15, 14, 13, 12, 11, 10], {result: 18, lastLive: 1, lastTime: 20}), /67%/);
-    assert.match(getGameResult([15, 14, 13, 12], {result: 10, lastLive: 1, lastTime: 20}), /0%/);
-    assert.match(getGameResult([16, 17, 18, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /50%/);
-  });
+    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /83%/);
+    assert.match(getGameEndMessage([20, 19, 15, 14, 13, 12, 11, 10], {result: 18, lastLive: 1, lastTime: 20}), /67%/);
+    assert.match(getGameEndMessage([15, 14, 13, 12], {result: 10, lastLive: 1, lastTime: 20}), /0%/);
+    assert.match(getGameEndMessage([16, 17, 18, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /50%/);
+  });*/
 });
 
-describe('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
+describe.skip('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
 
   (function () {
+    // мок для localStorage, поскольку при тестировании вне браузера такого объекта не существует
     let mockStorage = {};
     mockStorage.setItem = function (key, val) {
       this[key] = val + '';
@@ -103,8 +118,13 @@ describe('Проверка функции добавления рейтинга 
       }
     });
 
-
     global.localStorage = mockStorage;
+
+    before(function () {
+      // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
+      // связано с тем, что мы объявляем глобальный объект localStorage
+      localStorage['allRatings'] = '[]';
+    });
 
     it('Если нет других результатов, должен создаваться новый рейтинг', function () {
       assert.deepEqual(updateRatings(10), [10]);
@@ -132,14 +152,25 @@ describe('Проверка функции добавления рейтинга 
 // Для тестирования внутренней функции подсчета рейтинга пользователя
 describe('Проверка функции расчета рейтинга текущего пользователя игры', function () {
 
-  it('Возвращает объект вида {userPosition: .., totalUsers: .., percentRating: ..}', function () {
-    assert.containsAllKeys(getUserRating([11, 10, 8, 6, 5, 4], 6), ['userPosition', 'totalUsers', 'percentRating']);
+  beforeEach(function () {
+    // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
+    // связано с тем, что мы объявляем глобальный объект localStorage
+    localStorage['allRatings'] = '[]';
+  });
+
+
+  it('Возвращает объект вида {positionInRating: .., totalUsers: .., percentRating: ..}', function () {
+    assert.containsAllKeys(getUserRating([11, 10, 8, 6, 5, 4], 6), ['positionInRating', 'totalUsers', 'percentRating']);
+  });
+
+  it('Правильно рассчитывает рейтинги, если других результатов нет', function () {
+    assert.deepEqual(getUserRating([], 10), {positionInRating: 1, totalUsers: 1, percentRating: 100});
   });
 
   it('Правильно вычисляется позиция игрока в общем рейтинге', function () {
-    assert.propertyVal(getUserRating([11, 10, 8, 6, 5, 4], 6), 'userPosition', 4);
-    assert.propertyVal(getUserRating([11, 10, 8, 6, 5, 4], 4), 'userPosition', 6);
-    assert.propertyVal(getUserRating([11, 10, 8, 6, 5, 4], 11), 'userPosition', 1);
+    assert.propertyVal(getUserRating([6, 4], 4), 'positionInRating', 2);
+    assert.propertyVal(getUserRating([11, 10, 8, 6, 5, 4], 4), 'positionInRating', 6);
+    assert.propertyVal(getUserRating([11, 10, 8, 6, 5, 4], 11), 'positionInRating', 1);
   });
 
   it('Правильно возвращает общее количество игроков в общем рейтинге', function () {
@@ -149,12 +180,12 @@ describe('Проверка функции расчета рейтинга тек
   });
 
   it('Правильно рассчитывает процент пользователей у которых рейтинг меньше', function () {
-    assert.propertyVal(getUserRating([11, 10, 8, 5, 4], 10), 'percentRating', 60);
-    assert.propertyVal(getUserRating([11, 10, 8, 5, 4], 8), 'percentRating', 40);
-    assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 8), 'percentRating', 22);
-    assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 4), 'percentRating', 0);
-    assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 12), 'percentRating', 56);
-    assert.propertyVal(getUserRating([15, 14, 13, 12, 11, 10, 8, 5, 4], 14), 'percentRating', 78);
+    assert.propertyVal(getUserRating([4], 4), 'percentRating', 100);
+    assert.propertyVal(getUserRating([6, 4], 6), 'percentRating', 100);
+    assert.propertyVal(getUserRating([11, 10, 8, 5], 10), 'percentRating', 50);
+    assert.propertyVal(getUserRating([11, 10, 8, 5], 8), 'percentRating', 25);
+    assert.propertyVal(getUserRating([11, 10, 8, 5], 5), 'percentRating', 0);
+    assert.propertyVal(getUserRating([11, 10, 8], 10), 'percentRating', 33);
   });
 });
 

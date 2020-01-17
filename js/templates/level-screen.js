@@ -1,12 +1,8 @@
 import {startGame, nextLevel} from '../controller.js';
-import {getElementFromTemplate} from '../utilities.js';
+import {getElementFromTemplate, getTimeComponents} from '../utilities.js';
 
 const headerTemplate = (state) => {
-  const date = new Date();
-  date.setTime(state.lastTime);
-  const timeComponents = date.toLocaleTimeString('en-US', {hour12: false}).split(':');
-  const totalMinuts = timeComponents[1];
-  const totalSeconds = timeComponents[2];
+  const [totalMinuts, totalSeconds] = getTimeComponents(state.lastTime);
 
   return `<section class="game game--artist">
     <header class="game__header">

@@ -31,11 +31,11 @@ export function nextLevel(selectedAnswerIndexes) {
 
   // если получены результаты ответов пользователя на предыдущий вопрос
   if (selectedAnswerIndexes) {
-    const prevLevelAnswers = questions[levelIndex - 1].answers;
-    saveAnswerStatistic(selectedAnswerIndexes, 40 * 1000, prevLevelAnswers);
+    const answersVariants = questions[levelIndex - 1].answers;
+    saveAnswerStatistic(selectedAnswerIndexes, 40 * 1000, answersVariants);
 
     // проверяем, были ли допушены ошибки в ответах на предыдущем уровне игры
-    if (checkWrongAnswer(selectedAnswerIndexes, prevLevelAnswers)) {
+    if (checkWrongAnswer(selectedAnswerIndexes, answersVariants)) {
       removeGameLife();
     }
 
@@ -57,33 +57,38 @@ export function nextLevel(selectedAnswerIndexes) {
  * Запускает стартовый экран игры
  */
 export function startGame() {
-  gameState.level = initConfig.initLevel;
-  gameState.lastTime = initConfig.totalTime;
-  gameState.wrongAnswer = 0;
-  gameState.statistics = [];
-  gameState.gameEndCode = initConfig.gameEndCode['run'];
+  initGameState();
 
   screensContainer.textContent = '';
   renderScreen(getScreenWelcome());
 }
 
+// инициализация начального состояния игры
+function initGameState() {
+  gameState.level = initConfig.initLevel;
+  gameState.lastTime = initConfig.totalTime;
+  gameState.wrongAnswer = 0;
+  gameState.statistics = [];
+  gameState.endCode = initConfig.gameEndCode['run'];
+  gameState.totalQuestions = questions.length;
+}
 
 function checkGameEndStatus() {
 
   if (gameState.wrongAnswer === -1) {
-    gameState.gameEndCode = initConfig.gameEndCode['failTries'];
+    gameState.endCode = initConfig.gameEndCode['failTries'];
     renderScreen(getResultScreen('failTries'));
   }
 
   if (gameState.lastTime <= 0) {
-    gameState.gameEndCode = initConfig.gameEndCode['failTime'];
+    gameState.endCode = initConfig.gameEndCode['failTime'];
     renderScreen(getResultScreen('failTime'));
   }
 
-  if (gameState.level === questions.length) {
-    gameState.gameEndCode = initConfig.gameEndCode['complete'];
+  if (gameState.level === gameState.totalQuestions) {
+    gameState.endCode = initConfig.gameEndCode['complete'];
     renderScreen(getResultScreen('gameComplete', gameState.statistics));
   }
 
-  return gameState.gameEndCode;
+  return gameState.endCode;
 }

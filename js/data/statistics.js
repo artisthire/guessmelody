@@ -2,7 +2,8 @@
  * Модуль содержит функции подсчета результатов игры
  */
 
-import {statisticConfig} from './config.js';
+import {initConfig, statisticConfig} from './config.js';
+import {getTimeComponents} from '../utilities.js';
 
 // время, при привышении которого ответ не считается быстрым
 const LIMIT_TIME = statisticConfig.limitTime;
@@ -10,8 +11,6 @@ const LIMIT_TIME = statisticConfig.limitTime;
 const QUICK_RATIO = statisticConfig.quickRatio;
 const CORRECT_RATIO = statisticConfig.correctRatio;
 const FAIL_RATIO = statisticConfig.failRatio;
-// количество вопросов
-const TOTAL_QUESTION = 10;
 
 /**
  * Функция подсчета набранных игроком баллов
@@ -20,40 +19,50 @@ const TOTAL_QUESTION = 10;
  *  [{[] - массив выбранных пользователем ответов, time: {number} - милисекунды затраченные на ответ)}]
  * @param {number} wrongAnswer - количество неправильных ответов
  * @param {number} questionsCount - общее колличество вопросов
- * @return {number} - количество набраных баллов
+ * @return {object} - количество быстрых ответов и набраных баллов
  */
 export function calcUserResult(answers, wrongAnswer, questionsCount) {
   // колличество быстрых ответов
   const quickAnswer = answers.reduce((sum, answer) => sum + ((answer.time < LIMIT_TIME) ? 1 : 0), 0);
 
-  const rezult = quickAnswer * QUICK_RATIO + (questionsCount - quickAnswer) * CORRECT_RATIO + wrongAnswer * FAIL_RATIO;
+  const ball = quickAnswer * QUICK_RATIO + (questionsCount - quickAnswer) * CORRECT_RATIO + wrongAnswer * FAIL_RATIO;
 
-  return rezult;
+  return {quickAnswer, ball};
 }
 
 /**
  * Функция возвращает сообщение с результатом игры пользователем
  * При выиграше рассчитывает рейтинг пользователя в общем массиве результатов игр других пользователей
- * @param {object} userResult - объект с результатом игры пользователя
- *  {number} userResult.result - колличество набранных очков в результате игры
- *  {number} userResult.lastLive - колличество оставшихся жизней (нот)
- *  {number} userResult.lastTime - колличество оставшегося времени
+ * @param {number} gameEndCode - код статуса окончания игры
+ * @param {object} gameState - объект с состоянием игры
+ *  gameState.wrongAnswer - колличество допущенных ошибок,
+ *  gameState.lastTime - колличество оставшегося времени,
+ *  gameState.totalQuestions - общее колличество вопросов в игре,
+ *  gameState.statistics - массив с ответами пользователя
  * @return {string} - сообщение с результатом игры пользователем
  */
-export function getGameResult(userResult) {
+export function getGameEndMessage(gameEndCode, gameState) {
 
-  if (userResult.lastLive <= 0 && userResult.result < TOTAL_QUESTION) {
-    return 'У вас закончились все попытки. Ничего, повезёт в следующий раз!';
+  if (gameEndCode === initConfig.gameEndCode['failTries']) {
+    return `<h2 class="result__title">Какая жалость!</h2>
+    <p class="result__total result__total--fail">У вас закончились все попытки. Ничего, повезёт в следующий раз!</p>`;
   }
 
-  if (userResult.lastTime <= 0) {
-    return 'Время вышло! Вы не успели отгадать все мелодии';
+  if (gameEndCode === initConfig.gameEndCode['failTime']) {
+    return `<h2 class="result__title">Увы и ах!</h2>
+    <p class="result__total result__total--fail">Время вышло! Вы не успели отгадать все мелодии</p>`;
   }
 
-  const ratings = updateRatings(userResult.result);
-  const {userPosition, totalUsers, percentRating} = getUserRating(ratings, userResult.result);
+  // если игра успешно завершена подсчитываем и возвращаем статистику
+  const userResult = calcUserResult(gameState.statistics, gameState.wrongAnswer, gameState.totalQuestions);
+  const ratings = updateRatings(userResult.ball);
 
-  return `Вы заняли ${userPosition} место из ${totalUsers} игроков. Это лучше, чем у ${percentRating}% игроков`;
+  const [lastMinutes, lastSeconds] = getTimeComponents(gameState.lastTime);
+  const {positionInRating, totalUsers, percentRating} = getUserRating(ratings, userResult.ball);
+
+  return `<h2 class="result__title">Вы настоящий меломан!</h2>
+    <p class="result__total">За ${+lastMinutes} минуты и ${+lastSeconds} секунд вы набрали ${userResult.ball} баллов (${userResult.quickAnswer} быстрых), совершив ${gameState.wrongAnswer} ошибки</p>
+    <p class="result__text">Вы заняли ${positionInRating} место из ${totalUsers}. Это лучше чем у ${percentRating}% игроков</p>`;
 }
 
 /**
@@ -98,9 +107,15 @@ export function updateRatings(userRating) {
  *  percentRating - то же что и userPosition, но выраженное в процентах относительно результатов других пользователей
  */
 export function getUserRating(ratings, userRating) {
-  const userPosition = ratings.indexOf(userRating) + 1;
-  const totalUsers = ratings.length;
-  const percentRating = Math.round((totalUsers - userPosition) / totalUsers * 100);
 
-  return {userPosition, totalUsers, percentRating};
+   const positionInRating = ratings.indexOf(userRating) + 1;
+
+  if (ratings.length === 0 || positionInRating === 1) {
+    return {positionInRating: 1, totalUsers: 1, percentRating: 100};
+  }
+
+  const totalUsers = ratings.length;
+  const percentRating = Math.round((totalUsers - positionInRating) / totalUsers * 100);
+
+  return {positionInRating, totalUsers, percentRating};
 }
