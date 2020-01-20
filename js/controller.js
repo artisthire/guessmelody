@@ -9,6 +9,7 @@ import {gameState, questions} from './data/data.js';
 import {initConfig} from './data/config.js';
 
 import {saveAnswerStatistic, checkWrongAnswer, removeGameLife} from './process/process.js';
+import {getGameEndMessage} from './data/statistics.js';
 
 // контейнер, в котором отображаются все игровые окна
 const screensContainer = document.querySelector('.main');
@@ -39,8 +40,8 @@ export function nextLevel(selectedAnswerIndexes) {
       removeGameLife();
     }
 
-    // если игра успешно или неуспешно окончена, не переключаемся на следующий уровень
-    if (checkGameEndStatus() !== 0) {
+    // если игра окончена, не переключаемся на следующий уровень
+    if (checkGameEndStatus() !== initConfig.gameEndCode['run']) {
       return;
     }
   }
@@ -74,21 +75,31 @@ function initGameState() {
 }
 
 function checkGameEndStatus() {
+  let endCode = initConfig.gameEndCode['run'];
 
+  // проверяем статус завершения игры в зависимости от правил
+  // устанавливаем соответствующий код завершения игры
   if (gameState.wrongAnswer === -1) {
-    gameState.endCode = initConfig.gameEndCode['failTries'];
-    renderScreen(getResultScreen('failTries'));
+    endCode = initConfig.gameEndCode['failTries'];
   }
 
   if (gameState.lastTime <= 0) {
-    gameState.endCode = initConfig.gameEndCode['failTime'];
-    renderScreen(getResultScreen('failTime'));
+    endCode = initConfig.gameEndCode['failTime'];
   }
 
   if (gameState.level === gameState.totalQuestions) {
-    gameState.endCode = initConfig.gameEndCode['complete'];
-    renderScreen(getResultScreen('gameComplete', gameState.statistics));
+    endCode = initConfig.gameEndCode['complete'];
   }
 
-  return gameState.endCode;
+  // если выполнено одно из условий завершения игры, отображаем экран с результатом игры
+  if (endCode !== initConfig.gameEndCode['run']) {
+    const endMessage = getGameEndMessage(endCode, gameState);
+
+    renderScreen(getResultScreen(endMessage));
+  }
+
+  // обновляем состояние игры
+  gameState.endCode = endCode;
+
+  return endCode;
 }
