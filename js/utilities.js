@@ -26,6 +26,12 @@ export function getRandomIntInclusive(min = 0, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min; // Максимум и минимум включаются
 }
 
+/**
+ * Возвращает колличество минут и секунд из времени, представленном в миллисекундах
+ * Значения из одного символа дополняются до двузначного представления нулем в начале
+ * @param {number} time - колличество миллисекунд
+ * @return {array} - массив с колличеством минут и секунд
+ */
 export function getTimeComponents(time) {
   const date = new Date();
   date.setTime(time);
@@ -34,4 +40,22 @@ export function getTimeComponents(time) {
   const seconds = timeComponents[2];
 
   return [minuts, seconds];
+}
+
+/**
+ * Функция склонения слов идущим за заданным числом
+ * Например, 1 комментарИЙ, 2 комментарИЯ, 10 комментарИЕВ
+ * @param {number} num - число, в соотвествии с которым нужно изменить окончание следующего за ним слова
+ * @param {array} word - массив слов, которые идут за этим числом с соответствующими окончаниями
+ *  массив должен быть со следующими словами [склонение слова для числа 1, склонение слова для числа 2, склонение слова для числа 0]
+ * @return {string} - строка вида 'число слово_в_склоненни_соответствующего_числу'
+ */
+export function wordFrom(num, word) {
+  num = +num;
+  if (isNaN(num)) {
+    return word[2];
+  }
+
+  const cases = [2, 0, 1, 1, 1, 2];
+  return `${num} ${word[(num % 100 > 4 && num % 100 < 20) ? 2 : cases[(num % 10 < 5) ? num % 10 : 5]]}`;
 }

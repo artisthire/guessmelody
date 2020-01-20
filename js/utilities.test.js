@@ -1,6 +1,6 @@
 import {assert} from 'chai';
 
-import {getTimeComponents, getRandomIntInclusive} from './utilities.js';
+import {getTimeComponents} from './utilities.js';
 
 describe('Тест функции получения компонентов времени', function () {
 
