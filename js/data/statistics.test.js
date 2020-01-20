@@ -70,7 +70,6 @@ describe('Проверка функции выбода результата иг
   });
 
   it('Должен быть выигрыш, когда получены все ответы, не закончились попытки и время', function () {
-    const quickAnswer = 2;
     const wrongAnswer = 1;
     const totalQuestions = 10;
     const lastTime = (3 * 60 + 25) * 1000;
@@ -81,24 +80,9 @@ describe('Проверка функции выбода результата иг
 
     assert.match(getGameEndMessage(initConfig.gameEndCode['complete'], {statistics: fakeResults, wrongAnswer, totalQuestions, lastTime}), /меломан/);
   });
-
-  /*
-
-  it('Должна правильно рассчитываться позиция игрока в общем рейтинге', function () {
-    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /1 место/);
-    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 10, lastLive: 1, lastTime: 20}), /5 место/);
-    assert.match(getGameEndMessage([16, 17, 18, 15, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /4 место/);
-  });
-
-  it('Должна правильно рассчитываться процент игроков с меньшим рейтингом', function () {
-    assert.match(getGameEndMessage([15, 14, 13, 12, 10], {result: 16, lastLive: 1, lastTime: 20}), /83%/);
-    assert.match(getGameEndMessage([20, 19, 15, 14, 13, 12, 11, 10], {result: 18, lastLive: 1, lastTime: 20}), /67%/);
-    assert.match(getGameEndMessage([15, 14, 13, 12], {result: 10, lastLive: 1, lastTime: 20}), /0%/);
-    assert.match(getGameEndMessage([16, 17, 18, 14, 13, 12, 10], {result: 15, lastLive: 1, lastTime: 20}), /50%/);
-  });*/
 });
 
-describe.skip('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
+describe('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
 
   (function () {
     // мок для localStorage, поскольку при тестировании вне браузера такого объекта не существует

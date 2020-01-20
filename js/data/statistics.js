@@ -3,7 +3,7 @@
  */
 
 import {initConfig, statisticConfig} from './config.js';
-import {getTimeComponents} from '../utilities.js';
+import {getTimeComponents, wordFrom} from '../utilities.js';
 
 // время, при привышении которого ответ не считается быстрым
 const LIMIT_TIME = statisticConfig.limitTime;
@@ -60,8 +60,15 @@ export function getGameEndMessage(gameEndCode, gameState) {
   const [lastMinutes, lastSeconds] = getTimeComponents(gameState.lastTime);
   const {positionInRating, totalUsers, percentRating} = getUserRating(ratings, userResult.ball);
 
+  // для чисел получаем соответствующие строковые представления с числом и словом идущим за ним в соответствующем склонении
+  const lastMinutesString = wordFrom(lastMinutes, ['минуту', 'минуты', 'минут']);
+  const lastSecondsString = wordFrom(lastSeconds, ['секунда', 'секунды', 'секунд']);
+  const ballString = wordFrom(userResult.ball, ['бал', 'балла', 'баллов']);
+  const quickAnswerString = wordFrom(userResult.quickAnswer, ['быстрый', 'быстрых', 'быстрых']);
+  const wrongAnswerString = wordFrom(userResult.quickAnswer, ['ошибку', 'ошибки', 'ошибок']);
+
   return `<h2 class="result__title">Вы настоящий меломан!</h2>
-    <p class="result__total">За ${+lastMinutes} минуты и ${+lastSeconds} секунд вы набрали ${userResult.ball} баллов (${userResult.quickAnswer} быстрых), совершив ${gameState.wrongAnswer} ошибки</p>
+    <p class="result__total">За ${lastMinutesString} и ${lastSecondsString} вы набрали ${ballString} (${quickAnswerString}), совершив ${wrongAnswerString}</p>
     <p class="result__text">Вы заняли ${positionInRating} место из ${totalUsers}. Это лучше чем у ${percentRating}% игроков</p>`;
 }
 
@@ -72,13 +79,15 @@ export function getGameEndMessage(gameEndCode, gameState) {
  */
 export function updateRatings(userRating) {
   // временно храним результаты игор других пользователей в localStorage
-  const otherResults = JSON.parse(localStorage.getItem('allRatings'));
+  let otherResults = localStorage.getItem('allRatings');
 
   // если еще нет результатов игр пользователей, сохраняем первый результат в LocalStorage
   if (!otherResults) {
     localStorage.setItem('allRatings', JSON.stringify([userRating]));
     return [userRating];
   }
+
+  otherResults = JSON.parse(otherResults);
 
   // если результат пользователя уже есть в общем рейтинге
   // рейтинг не обновляем
@@ -108,9 +117,9 @@ export function updateRatings(userRating) {
  */
 export function getUserRating(ratings, userRating) {
 
-   const positionInRating = ratings.indexOf(userRating) + 1;
+  const positionInRating = ratings.indexOf(userRating) + 1;
 
-  if (ratings.length === 0 || positionInRating === 1) {
+  if (ratings.length === 0) {
     return {positionInRating: 1, totalUsers: 1, percentRating: 100};
   }
 
