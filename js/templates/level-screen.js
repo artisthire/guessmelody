@@ -1,4 +1,5 @@
 import {startGame, nextLevel} from '../controller.js';
+import {initTrackController} from '../process/tracks-controller.js';
 import {getElementFromTemplate, getTimeComponents} from '../utilities.js';
 
 const headerTemplate = (state) => {
@@ -31,9 +32,8 @@ const selectArtistTemplate = (question) => `<section class="game__screen">
     <h2 class="game__title">${question.title}</h2>
     <div class="game__track">
       <button class="track__button track__button--pause" type="button"></button>
-      <audio></audio>
+      <audio src=${question.srcs[0]} autoplay></audio>
     </div>
-
     <form class="game__artist">
 
     ${question.answers.map((answer, index) =>
@@ -54,12 +54,11 @@ const selectGenreTemplate = (question) => `<section class="game__screen">
   <h2 class="game__title">${question.title}</h2>
   <form class="game__tracks">
 
-
   ${question.answers.map((answer, index) =>
     `<div class="track">
       <button class="track__button ${index === 0 ? 'track__button--pause' : 'track__button--play'}" type="button"></button>
       <div class="track__status">
-        <audio></audio>
+        <audio src=${answer.src} ${index === 0 ? 'autoplay' : ''}></audio>
       </div>
       <div class="game__answer">
         <input class="game__input visually-hidden" type="checkbox" name="answer" value="${answer.artist}" id="answer-${index + 1}">
@@ -208,6 +207,7 @@ export default function getLevelScreen(gameState, levelQuestion) {
   let fullScreenElement = getElementFromTemplate(fullScreenTemplate);
 
   fullScreenElement = initHeaderTemplate(fullScreenElement);
+  fullScreenElement = initTrackController(fullScreenElement);
   fullScreenElement = generateLevelData.initFunct(fullScreenElement);
 
   return fullScreenElement;
