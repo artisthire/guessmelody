@@ -1,7 +1,12 @@
+/**
+ * Модуль содержит шаблоны и функции инициализации для разметки игровых уровней
+ * по выбору Артиста или Жанра песни
+ */
 import {startGame, nextLevel} from '../controller.js';
 import {initTrackController} from '../process/tracks-controller.js';
 import {getElementFromTemplate, getTimeComponents} from '../utilities.js';
 
+// шаблон разметки шапки игровых уровней
 const headerTemplate = (state) => {
   const [totalMinuts, totalSeconds] = getTimeComponents(state.lastTime);
 
@@ -28,6 +33,7 @@ const headerTemplate = (state) => {
     </header>`;
 };
 
+// шаблон разметки игрового уровня на выбор Артиста по аудиотреку
 const selectArtistTemplate = (question) => `<section class="game__screen">
     <h2 class="game__title">${question.title}</h2>
     <div class="game__track">
@@ -50,6 +56,7 @@ const selectArtistTemplate = (question) => `<section class="game__screen">
   </section>
 </section>`;
 
+// шаблон разметки игрового уровня на выбор Жанра аудиотреков
 const selectGenreTemplate = (question) => `<section class="game__screen">
   <h2 class="game__title">${question.title}</h2>
   <form class="game__tracks">
@@ -72,7 +79,7 @@ const selectGenreTemplate = (question) => `<section class="game__screen">
 </section>`;
 
 /**
- * Функция инициализации DOM-элементов игрового окна
+ * Функция инициализации DOM-элементов шапки игрового уровня
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
@@ -95,7 +102,7 @@ function initHeaderTemplate(container) {
 }
 
 /**
- * Функция инициализации DOM-элементов игрового окна
+ * Функция инициализации DOM-элементов уровня игрового окна на выбор Артиста
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
@@ -128,7 +135,7 @@ function initSelectArtistTemplate(container) {
 }
 
 /**
- * Функция инициализации DOM-элементов игрового окна
+ * Функция инициализации DOM-элементов уровня игрового окна на выбор Жанра
  * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
@@ -197,15 +204,25 @@ function getSelectedAnswerIdexes(selectBtns) {
   }, []);
 }
 
+/**
+ * На основе типа игрового уровня и шабонов создает и инициализирует разметку для игрового окна
+ * @param {object} gameState - объект состояния игры, используемый при генерации шаблонов
+ * @param {object} levelQuestion - объект с данными о вопросах для текущего уровня игры
+ * @return {object} - DOM-элемент, содержащий всю разметку игрового окна инициализированную нужными обработчиками событий
+ */
 export default function getLevelScreen(gameState, levelQuestion) {
 
+  // по типу полученных вопросов выбрать соответствующий шаблон разметки и функцию инициализации для тела разметки игрового уровня
   const generateLevelData = (levelQuestion.type === 'artist') ?
     {template: selectArtistTemplate, initFunct: initSelectArtistTemplate} :
     {template: selectGenreTemplate, initFunct: initSelectGenreTemplate};
 
+  // получаем общую текстовоую разметку шапки и тела уровня игры
   const fullScreenTemplate = headerTemplate(gameState) + generateLevelData.template(levelQuestion);
+  // на основе шаблона генерируем DOM-разметку
   let fullScreenElement = getElementFromTemplate(fullScreenTemplate);
 
+  // последовательная инициализация шапки и тела игрового уровня обработчиками событий
   fullScreenElement = initHeaderTemplate(fullScreenElement);
   fullScreenElement = initTrackController(fullScreenElement);
   fullScreenElement = generateLevelData.initFunct(fullScreenElement);

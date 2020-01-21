@@ -1,5 +1,5 @@
 /**
- * Модуль управления переключением игровых экранов
+ * Модуль управления переключением игровыми экранами
  */
 import getScreenWelcome from './templates/welcome.js';
 import getLevelScreen from './templates/level-screen.js';
@@ -9,29 +9,35 @@ import {gameState, questions} from './data/data.js';
 import {initConfig} from './data/config.js';
 
 import {saveAnswerStatistic, checkWrongAnswer, removeGameLife} from './process/process.js';
-import {getGameEndMessage} from './data/statistics.js';
 
 // контейнер, в котором отображаются все игровые окна
 const screensContainer = document.querySelector('.main');
 
 /**
  * Отображает игровой экран
- * @param {object} element - контейнер с DOM-элементами для добавления в HTML-разметку
- * @param {object} container - ссылка на элементв в общей разметки игры, внутри которого отображаются игровые окна
+ * @param {object} element - контейнер, содержащий разметку, сгенерированную на основе шаблонов игровых окон
  */
-function renderScreen(element, container = screensContainer) {
-  // обновить содержимое общего контейнера для игровых окон
-  container.textContent = '';
-  container.append(...element.children);
+function renderScreen(element) {
+  // удаялем предыдущую разметку игрового окна
+  screensContainer.textContent = '';
+  // вставляются "дети", поскольку функция генерации разметки на основе тестовых шаблонов
+  // возвращает элементы вставленные во временный контейнер <DIV>
+  // поэтому элементы игровых окон из него нужно вынуть, чтобы не поламать стили CSS
+  screensContainer.append(...element.children);
 }
 
+/**
+ * Функция отображения следующего уровня игры
+ * Вызывается после выбора пользователем ответов на текущем уровне игры
+ * @param {array} selectedAnswerIndexes - порядковые индексы номеров ответов, которые были выбраны пользователем при ответе на предыдущий вопрос
+ */
 export function nextLevel(selectedAnswerIndexes) {
-
-  // получаем номер уровня игры
+  // получаем номер уровня игры, который нужно отобразить
   const levelIndex = gameState.level;
 
   // если получены результаты ответов пользователя на предыдущий вопрос
   if (selectedAnswerIndexes) {
+    // сохранить статистику ответов
     const answersVariants = questions[levelIndex - 1].answers;
     saveAnswerStatistic(selectedAnswerIndexes, 40 * 1000, answersVariants);
 
@@ -40,8 +46,12 @@ export function nextLevel(selectedAnswerIndexes) {
       removeGameLife();
     }
 
+    // проверяем, не закончилась ли игра
+    const endCode = checkGameEndStatus();
     // если игра окончена, не переключаемся на следующий уровень
-    if (checkGameEndStatus() !== initConfig.gameEndCode['run']) {
+    // а отображаем окно с результатами игры
+    if (endCode !== initConfig.gameEndCode['run']) {
+      renderScreen(getResultScreen(endCode, gameState));
       return;
     }
   }
@@ -58,13 +68,15 @@ export function nextLevel(selectedAnswerIndexes) {
  * Запускает стартовый экран игры
  */
 export function startGame() {
+  // инициализация начальных параметров игры
   initGameState();
-
-  screensContainer.textContent = '';
+  // показ стартового окна игры
   renderScreen(getScreenWelcome());
 }
 
-// инициализация начального состояния игры
+/**
+ * Инициализирует объект состояния игры в соответствии со стартовой конфигурацией
+ */
 function initGameState() {
   gameState.level = initConfig.initLevel;
   gameState.lastTime = initConfig.totalTime;
@@ -74,6 +86,12 @@ function initGameState() {
   gameState.totalQuestions = questions.length;
 }
 
+/**
+ * Проверяет и возвращает код состояния завершения игры
+ * Если игра продолжается, обновляет и возвращает соответствующий код
+ * Если игра окончена, обновляет и возвращает соответствующий причине окончания код завершения игры
+ * @return {number} - числов соответствующие коду завершения или продолжения игры, см. объект initConfig.gameEndCode
+ */
 function checkGameEndStatus() {
   let endCode = initConfig.gameEndCode['run'];
 
@@ -89,13 +107,6 @@ function checkGameEndStatus() {
 
   if (gameState.level === gameState.totalQuestions) {
     endCode = initConfig.gameEndCode['complete'];
-  }
-
-  // если выполнено одно из условий завершения игры, отображаем экран с результатом игры
-  if (endCode !== initConfig.gameEndCode['run']) {
-    const endMessage = getGameEndMessage(endCode, gameState);
-
-    renderScreen(getResultScreen(endMessage));
   }
 
   // обновляем состояние игры

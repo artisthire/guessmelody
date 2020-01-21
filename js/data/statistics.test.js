@@ -1,3 +1,6 @@
+/**
+ * Модуль тестирования функций подсчета статистики игры
+ */
 import {assert} from 'chai';
 
 import {calcUserResult, getGameEndMessage, updateRatings, getUserRating} from './statistics.js';
@@ -53,7 +56,7 @@ describe('Проверка функции подсчета статистики'
   });
 });
 
-describe('Проверка функции выбода результата игры', function () {
+describe('Проверка функции вывода результата игры', function () {
 
   before(function () {
     // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий

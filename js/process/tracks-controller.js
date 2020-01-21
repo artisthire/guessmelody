@@ -1,3 +1,9 @@
+/**
+ * Модуль содержит функционал по инициализации элементов управления тегами <audio>,
+ * которые отвечают за воспроизведение аудиотреков в уровнях игры
+ */
+
+// классы для поиска и изменения состояния кнопками управления аудиотреками
 const CONTROL_BTN_CLASS = 'track__button';
 const PLAY_CLASS = 'track__button--play';
 const PAUSE_CLASS = 'track__button--pause';
@@ -10,6 +16,8 @@ const PAUSE_CLASS = 'track__button--pause';
 export function initTrackController(container) {
   const controlBtns = Array.from(container.querySelectorAll(`.${CONTROL_BTN_CLASS}`));
   const audioElements = controlBtns.map((controlBtn) => controlBtn.parentElement.querySelector('audio'));
+  const controlToAudioElement = new Map();
+  controlBtns.forEach((controlBtn, index) => controlToAudioElement.set(controlBtn, audioElements[index]));
 
   let prevControlBtn = null;
   let prevAudioElement = null;
@@ -30,12 +38,12 @@ export function initTrackController(container) {
 
     // для BUTTON используем CLOSEST, т.к. клик может быть внутри BUTTON на другом элементе и тогда будет неправильный target
     const currentControlBtn = evt.target.closest(`.${CONTROL_BTN_CLASS}`);
-    const currentAudioElement = audioElements[controlBtns.indexOf(currentControlBtn)];
+    const currentAudioElement = controlToAudioElement.get(currentControlBtn);
 
     // при первоначальной загрузке страницы определить значение для предыдущего воспроизводимого трека
     if (!prevControlBtn) {
       prevControlBtn = controlBtns.find((controlBtn) => controlBtn.classList.contains(PAUSE_CLASS));
-      prevAudioElement = audioElements.find((audioElement) => !audioElement.ended);
+      prevAudioElement = controlToAudioElement.get(prevControlBtn);
     }
 
     // если клик по кнопке управления, которая соответствует воспроизведению другого трека

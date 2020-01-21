@@ -4,7 +4,7 @@
 import {nextLevel} from '../controller.js';
 import {getElementFromTemplate} from '../utilities.js';
 
-// шаблон игрового окна
+// шаблон стартового окна игры
 const welcomTemplate = `<section class="welcome">
     <div class="welcome__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     <button class="welcome__button"><span class="visually-hidden">Начать игру</span></button>
@@ -40,6 +40,10 @@ function initScreenWelcome(container) {
   return container;
 }
 
+/**
+ * Функция возвращает DOM-элемент с разметкой стартового окна и навешенными обработчиками событий
+ * @return {object} - DOM-элемент контейнер с разметкой стартового игрового окна
+ */
 export default function getScreenWelcome() {
   let screenWelcomeElement = getElementFromTemplate(welcomTemplate);
   screenWelcomeElement = initScreenWelcome(screenWelcomeElement);

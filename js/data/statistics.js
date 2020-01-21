@@ -1,5 +1,5 @@
 /**
- * Модуль содержит функции подсчета результатов игры
+ * Модуль содержит функции подсчета статистики результатов игры
  */
 
 import {initConfig, statisticConfig} from './config.js';
@@ -13,27 +13,10 @@ const CORRECT_RATIO = statisticConfig.correctRatio;
 const FAIL_RATIO = statisticConfig.failRatio;
 
 /**
- * Функция подсчета набранных игроком баллов
- * @param {array} answers - массив ответов и затраченного времени на каждый вопрос. Упорядочен последовательно по порядку вопросов
- *  каждый объект внутри массива содержит результат ответов пользователя по вопросам:
- *  [{[] - массив выбранных пользователем ответов, time: {number} - милисекунды затраченные на ответ)}]
- * @param {number} wrongAnswer - количество неправильных ответов
- * @param {number} questionsCount - общее колличество вопросов
- * @return {object} - количество быстрых ответов и набраных баллов
- */
-export function calcUserResult(answers, wrongAnswer, questionsCount) {
-  // колличество быстрых ответов
-  const quickAnswer = answers.reduce((sum, answer) => sum + ((answer.time < LIMIT_TIME) ? 1 : 0), 0);
-
-  const ball = quickAnswer * QUICK_RATIO + (questionsCount - quickAnswer) * CORRECT_RATIO + wrongAnswer * FAIL_RATIO;
-
-  return {quickAnswer, ball};
-}
-
-/**
  * Функция возвращает сообщение с результатом игры пользователем
  * При выиграше рассчитывает рейтинг пользователя в общем массиве результатов игр других пользователей
- * @param {number} gameEndCode - код статуса окончания игры
+ * Сообщение используется для отображения результатов игры на финальном экране
+ * @param {number} gameEndCode - код статуса окончания игры (закончились попытки, время, успешное окончание)
  * @param {object} gameState - объект с состоянием игры
  *  gameState.wrongAnswer - колличество допущенных ошибок,
  *  gameState.lastTime - колличество оставшегося времени,
@@ -56,20 +39,40 @@ export function getGameEndMessage(gameEndCode, gameState) {
   // если игра успешно завершена подсчитываем и возвращаем статистику
   const userResult = calcUserResult(gameState.statistics, gameState.wrongAnswer, gameState.totalQuestions);
   const ratings = updateRatings(userResult.ball);
-
+  // получаем оставшееся время и рейтинг пользователя
   const [lastMinutes, lastSeconds] = getTimeComponents(gameState.lastTime);
   const {positionInRating, totalUsers, percentRating} = getUserRating(ratings, userResult.ball);
 
-  // для чисел получаем соответствующие строковые представления с числом и словом идущим за ним в соответствующем склонении
+  // получаем строковое представление для статистики пользователя в виде:
+  // числовой результат + единицы измерения этого результата в виде текста соответствующего склонения
+  // например, 1 минута 25 секунд, 8 баллов 3 быстрых
   const lastMinutesString = wordFrom(lastMinutes, ['минуту', 'минуты', 'минут']);
   const lastSecondsString = wordFrom(lastSeconds, ['секунда', 'секунды', 'секунд']);
   const ballString = wordFrom(userResult.ball, ['бал', 'балла', 'баллов']);
   const quickAnswerString = wordFrom(userResult.quickAnswer, ['быстрый', 'быстрых', 'быстрых']);
-  const wrongAnswerString = wordFrom(userResult.quickAnswer, ['ошибку', 'ошибки', 'ошибок']);
+  const wrongAnswerString = wordFrom(gameState.wrongAnswer, ['ошибку', 'ошибки', 'ошибок']);
 
   return `<h2 class="result__title">Вы настоящий меломан!</h2>
     <p class="result__total">За ${lastMinutesString} и ${lastSecondsString} вы набрали ${ballString} (${quickAnswerString}), совершив ${wrongAnswerString}</p>
     <p class="result__text">Вы заняли ${positionInRating} место из ${totalUsers}. Это лучше чем у ${percentRating}% игроков</p>`;
+}
+
+/**
+ * Функция подсчета набранных игроком баллов и колличества быстрых ответов
+ * @param {array} answers - массив ответов и затраченного времени на каждый вопрос. Упорядочен последовательно по порядку уровней игры
+ *  Каждый объект внутри массива содержит результат ответов пользователя на вопрос каждого уровня:
+ *  [{[] - массив выбранных пользователем ответов, time: {number} - милисекунды затраченные на ответ)}]
+ * @param {number} wrongAnswer - количество неправильных ответов
+ * @param {number} questionsCount - общее колличество вопросов
+ * @return {object} - объект вида {quickAnswer, ball} с колличеством быстрых ответов и набраных баллов
+ */
+export function calcUserResult(answers, wrongAnswer, questionsCount) {
+  // колличество быстрых ответов
+  const quickAnswer = answers.reduce((sum, answer) => sum + ((answer.time < LIMIT_TIME) ? 1 : 0), 0);
+
+  const ball = quickAnswer * QUICK_RATIO + (questionsCount - quickAnswer) * CORRECT_RATIO + wrongAnswer * FAIL_RATIO;
+
+  return {quickAnswer, ball};
 }
 
 /**
@@ -107,13 +110,13 @@ export function updateRatings(userRating) {
 }
 
 /**
- * Функция возвращает рейтинг результата игры текущего пользователя отосительно результатов других пользователей
- * @param {array} ratings - массив {number} набранных очков других пользователями
+ * Функция возвращает позицию результата игры текущего пользователя отосительно результатов других пользователей
+ * @param {array} ratings - массив {number} набранных очков другими пользователями
  * @param {number} userRating - колличество набранных очков текущим пользователем
  * @return {object} - объект с рейтинговыми показателями игры текущего пользователя:
- *  userPosition - позиция результата игры текущего пользователя относительно результатов других пользователей
+ *  positionInRating - позиция результата игры текущего пользователя относительно результатов других пользователей
  *  totalUsers - общее колличество пользователей, попавших в рейтиги
- *  percentRating - то же что и userPosition, но выраженное в процентах относительно результатов других пользователей
+ *  percentRating - то же что и positionInRating, но выраженное в процентах относительно результатов других пользователей
  */
 export function getUserRating(ratings, userRating) {
 

@@ -1,8 +1,11 @@
-
+/**
+ * Модуль содержит шаблон разметки и функцию инициализации финального окна с результатом игры
+ */
 import {startGame} from '../controller.js';
+import {getGameEndMessage} from '../data/statistics.js';
 import {getElementFromTemplate} from '../utilities.js';
 
-// Шаблон разметки окна проигрыша в результате завершения времени игры
+// Общий шаблон разметки окна с результатом игры
 const resultScreenTemplate = (message) => `<section class="result">
     <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     ${message}
@@ -15,8 +18,8 @@ const resultScreenTemplate = (message) => `<section class="result">
  * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация (добавлены обработчики событий)
  */
 function initResultScreen(container) {
+  // добавить обработчик рестарта игры
   const replayBtn = container.querySelector('.result__replay');
-
   replayBtn.addEventListener('click', onReplayBtnClick);
 
   return container;
@@ -31,11 +34,18 @@ function initResultScreen(container) {
   }
 }
 
-// TODO: доделать передачу окна результата в контроллер
-export default function getResultScreen(message) {
+/**
+ * Функция генерации разметки окна результатов игры и добавления к нему соответствующих обработчиков
+ * @param {number} endCode - числовой код, соответствующий статусу завершения игры, см. объект initConfig.gameEndCode
+ * @param {object} gameState - объект, хранящий состояние игрового процесса (время, колличество ошибок и т.д.)
+ * @return {object} - DOM-элемент контейнер с разметкой окна результатов игры, над которым выполнена инциализация (добавлены обработчики событий)
+ */
+export default function getResultScreen(endCode, gameState) {
+  // по коду завершения игры получить шаблон разметки сообщения об окончании игры
+  const endMessage = getGameEndMessage(endCode, gameState);
 
   // получаем и инициализируем DOM-элемент с результатом игры
-  let resultScreenElement = getElementFromTemplate(resultScreenTemplate(message));
+  let resultScreenElement = getElementFromTemplate(resultScreenTemplate(endMessage));
   resultScreenElement = initResultScreen(resultScreenElement);
 
   return resultScreenElement;
