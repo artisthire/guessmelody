@@ -1,5 +1,7 @@
 /**
  * Модуль содержит функции для предзагрузки данных для игры
+ * Не используется FETCH, поскольку политика сайтов ресурсов не дает загрузить без {mode: 'no-cors'}
+ * А FETCH с {mode: 'no-cors'} не дает получить доступ к Response и телу ответа, т.е. нельзя проверть успешность загрузки ресурсов
  */
 
 /**
@@ -28,11 +30,9 @@ function getResourceUrls(gameData) {
  * @return {promise} - промис, который завершается после загрузки всех файлов
  */
 function getFiles(loadFileFunc, urls) {
-  return new Promise(function (resolve, reject) {
-    let requests = urls.map((url) => loadFileFunc(url));
+  let requests = urls.map((url) => loadFileFunc(url));
 
-    Promise.all(requests).then(() => resolve()).catch(() => reject());
-  });
+  return Promise.all(requests);
 }
 
 /**
@@ -73,8 +73,9 @@ function getImageFile(url) {
 export default function preloadResource(gameData, success, error) {
   let resourceUrls = getResourceUrls(gameData);
 
-  getFiles(getAudioFile, resourceUrls.audio)
-  .then(() => getFiles(getImageFile, resourceUrls.image))
+  getFiles(getImageFile, resourceUrls.image)
+  .then(() => getFiles(getAudioFile, resourceUrls.audio))
   .then(()=> success())
   .catch(() => error());
 }
+
