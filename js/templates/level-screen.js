@@ -3,6 +3,7 @@
  * по выбору Артиста или Жанра песни
  */
 import {startGame, nextLevel} from '../controller.js';
+import showModalConfirm from './modal-confirm.js';
 import {initTrackController} from '../process/tracks-controller.js';
 import {getElementFromTemplate, getTimeComponents} from '../utilities.js';
 
@@ -97,7 +98,8 @@ function initHeaderTemplate(container) {
    */
   function onBackBtnClick(evt) {
     evt.preventDefault();
-    startGame();
+
+    showModalConfirm(() => startGame());
   }
 }
 
