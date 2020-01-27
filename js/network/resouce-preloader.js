@@ -69,13 +69,12 @@ function getImageFile(url) {
  * @param {object} gameData - объект с данными о ресурсах, которые нужно загрузить. Содержит в т.ч. ссылки URL на файлы.
  * @param {function} success - callback-функция, которая вызывается при успешной загруке всех файлов
  * @param {function} error - callback-функция, которая вызывается если хоть один файл загружен не был
+ * @return {array} - массив результатов предзагрузки
  */
-export default function preloadResource(gameData, success, error) {
+export default async function preloadResource(gameData) {
   let resourceUrls = getResourceUrls(gameData);
 
-  getFiles(getImageFile, resourceUrls.image)
-  .then(() => getFiles(getAudioFile, resourceUrls.audio))
-  .then(()=> success())
-  .catch(() => error());
+  await getFiles(getImageFile, resourceUrls.image);
+  return await getFiles(getAudioFile, resourceUrls.audio);
 }
 

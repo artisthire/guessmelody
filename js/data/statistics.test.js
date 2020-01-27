@@ -58,12 +58,6 @@ describe('Проверка функции подсчета статистики'
 
 describe('Проверка функции вывода результата игры', function () {
 
-  before(function () {
-    // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
-    // связано с тем, что мы объявляем глобальный объект localStorage
-    localStorage['allRatings'] = '[]';
-  });
-
   it('Должен быть проигрыш, когда закончились попытки', function () {
     assert.match(getGameEndMessage(initConfig.gameEndCode['failTries']), /попытки/);
   });
@@ -87,64 +81,29 @@ describe('Проверка функции вывода результата иг
 
 describe('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
 
-  (function () {
-    // мок для localStorage, поскольку при тестировании вне браузера такого объекта не существует
-    let mockStorage = {};
-    mockStorage.setItem = function (key, val) {
-      this[key] = val + '';
-    };
-    mockStorage.getItem = function (key) {
-      if (key in this) {
-        return this[key];
-      }
-      return null;
-    };
-    Object.defineProperty(mockStorage, 'length', {
-      get() {
-        return Object.keys(this).length - 2;
-      }
-    });
+  it('Если нет других результатов, должен создаваться новый рейтинг', function () {
+    assert.deepEqual(updateRatings(10), [10]);
+  });
 
-    global.localStorage = mockStorage;
+  it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
+    updateRatings(11);
+    updateRatings(8);
 
-    before(function () {
-      // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
-      // связано с тем, что мы объявляем глобальный объект localStorage
-      localStorage['allRatings'] = '[]';
-    });
+    assert.deepEqual(updateRatings(10), [11, 10, 8]);
+  });
 
-    it('Если нет других результатов, должен создаваться новый рейтинг', function () {
-      assert.deepEqual(updateRatings(10), [10]);
-    });
+  it('Если рейтинга текущего пользователя в общем массиве нет, он должен в него добавляться', function () {
+    assert.deepEqual(updateRatings(7), [11, 10, 8, 7]);
+  });
 
-    it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
-      updateRatings(11);
-      updateRatings(8);
-
-      assert.deepEqual(updateRatings(10), [11, 10, 8]);
-    });
-
-    it('Если рейтинга текущего пользователя в общем массиве нет, он должен в него добавляться', function () {
-      assert.deepEqual(updateRatings(7), [11, 10, 8, 7]);
-    });
-
-    it('Общий рейтинг отсортирован по убыванию', function () {
-      assert.sameOrderedMembers(updateRatings(7), [11, 10, 8, 7]);
-    });
-
-  })();
+  it('Общий рейтинг отсортирован по убыванию', function () {
+    assert.sameOrderedMembers(updateRatings(7), [11, 10, 8, 7]);
+  });
 
 });
 
 // Для тестирования внутренней функции подсчета рейтинга пользователя
 describe('Проверка функции расчета рейтинга текущего пользователя игры', function () {
-
-  beforeEach(function () {
-    // сбрасываем состояние рейтингов в моке LocalStorage для того, чтобы предыдущие тесты не повлияли на текущий
-    // связано с тем, что мы объявляем глобальный объект localStorage
-    localStorage['allRatings'] = '[]';
-  });
-
 
   it('Возвращает объект вида {positionInRating: .., totalUsers: .., percentRating: ..}', function () {
     assert.containsAllKeys(getUserRating([11, 10, 8, 6, 5, 4], 6), ['positionInRating', 'totalUsers', 'percentRating']);
@@ -167,8 +126,8 @@ describe('Проверка функции расчета рейтинга тек
   });
 
   it('Правильно рассчитывает процент пользователей у которых рейтинг меньше', function () {
-    assert.propertyVal(getUserRating([4], 4), 'percentRating', 100);
-    assert.propertyVal(getUserRating([6, 4], 6), 'percentRating', 100);
+    assert.propertyVal(getUserRating([4], 4), 'percentRating', 0);
+    assert.propertyVal(getUserRating([6, 4], 6), 'percentRating', 50);
     assert.propertyVal(getUserRating([11, 10, 8, 5], 10), 'percentRating', 50);
     assert.propertyVal(getUserRating([11, 10, 8, 5], 8), 'percentRating', 25);
     assert.propertyVal(getUserRating([11, 10, 8, 5], 5), 'percentRating', 0);

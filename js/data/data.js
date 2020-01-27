@@ -11,7 +11,8 @@ export const gameState = {
   lastTime: 5 * 60 * 1000,
   totalQuestions: 10,
   endCode: 0,
-  statistics: []
+  statistics: [],
+  userResults: []
 };
 
 // структура, хранящая результаты игры пользователя

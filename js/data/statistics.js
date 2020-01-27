@@ -4,6 +4,8 @@
 
 import {initConfig, statisticConfig} from './config.js';
 import {getTimeComponents, wordFrom} from '../utilities.js';
+import {gameState} from '../data/data.js';
+import {setGameStatistics} from '../network/server-communication.js';
 
 // время, при привышении которого ответ не считается быстрым
 const LIMIT_TIME = statisticConfig.limitTime;
@@ -17,14 +19,14 @@ const FAIL_RATIO = statisticConfig.failRatio;
  * При выиграше рассчитывает рейтинг пользователя в общем массиве результатов игр других пользователей
  * Сообщение используется для отображения результатов игры на финальном экране
  * @param {number} gameEndCode - код статуса окончания игры (закончились попытки, время, успешное окончание)
- * @param {object} gameState - объект с состоянием игры
- *  gameState.wrongAnswer - колличество допущенных ошибок,
- *  gameState.lastTime - колличество оставшегося времени,
- *  gameState.totalQuestions - общее колличество вопросов в игре,
- *  gameState.statistics - массив с ответами пользователя
+ * @param {object} state - объект с состоянием игры
+ *  state.wrongAnswer - колличество допущенных ошибок,
+ *  state.lastTime - колличество оставшегося времени,
+ *  state.totalQuestions - общее колличество вопросов в игре,
+ *  state.statistics - массив с ответами пользователя
  * @return {string} - сообщение с результатом игры пользователем
  */
-export function getGameEndMessage(gameEndCode, gameState) {
+export function getGameEndMessage(gameEndCode, state) {
 
   if (gameEndCode === initConfig.gameEndCode['failTries']) {
     return `<h2 class="result__title">Какая жалость!</h2>
@@ -37,10 +39,15 @@ export function getGameEndMessage(gameEndCode, gameState) {
   }
 
   // если игра успешно завершена подсчитываем и возвращаем статистику
-  const userResult = calcUserResult(gameState.statistics, gameState.wrongAnswer, gameState.totalQuestions);
+  const userResult = calcUserResult(state.statistics, state.wrongAnswer, state.totalQuestions);
   const ratings = updateRatings(userResult.ball);
+
+  if (!ratings.length) {
+    return '';
+  }
+
   // получаем оставшееся время и рейтинг пользователя
-  const [lastMinutes, lastSeconds] = getTimeComponents(gameState.lastTime);
+  const [lastMinutes, lastSeconds] = getTimeComponents(state.lastTime);
   const {positionInRating, totalUsers, percentRating} = getUserRating(ratings, userResult.ball);
 
   // получаем строковое представление для статистики пользователя в виде:
@@ -50,7 +57,7 @@ export function getGameEndMessage(gameEndCode, gameState) {
   const lastSecondsString = wordFrom(lastSeconds, ['секунда', 'секунды', 'секунд']);
   const ballString = wordFrom(userResult.ball, ['бал', 'балла', 'баллов']);
   const quickAnswerString = wordFrom(userResult.quickAnswer, ['быстрый', 'быстрых', 'быстрых']);
-  const wrongAnswerString = wordFrom(gameState.wrongAnswer, ['ошибку', 'ошибки', 'ошибок']);
+  const wrongAnswerString = wordFrom(state.wrongAnswer, ['ошибку', 'ошибки', 'ошибок']);
 
   return `<h2 class="result__title">Вы настоящий меломан!</h2>
     <p class="result__total">За ${lastMinutesString} и ${lastSecondsString} вы набрали ${ballString} (${quickAnswerString}), совершив ${wrongAnswerString}</p>
@@ -81,16 +88,9 @@ export function calcUserResult(answers, wrongAnswer, questionsCount) {
  * @return {array} - обновленный массив с результатами игр всех пользователей
  */
 export function updateRatings(userRating) {
-  // временно храним результаты игор других пользователей в localStorage
-  let otherResults = localStorage.getItem('allRatings');
-
-  // если еще нет результатов игр пользователей, сохраняем первый результат в LocalStorage
-  if (!otherResults) {
-    localStorage.setItem('allRatings', JSON.stringify([userRating]));
-    return [userRating];
-  }
-
-  otherResults = JSON.parse(otherResults);
+  // результаты игор других пользователей
+  // в gameState.userResults попадают во время предварительной загрузки ресурсов для игры
+  const otherResults = gameState.userResults;
 
   // если результат пользователя уже есть в общем рейтинге
   // рейтинг не обновляем
@@ -104,7 +104,7 @@ export function updateRatings(userRating) {
   // общий рейтинг отсортирован по убыванию
   newRatings.sort((a, b) => b - a);
 
-  localStorage.setItem('allRatings', JSON.stringify(newRatings));
+  setGameStatistics(newRatings);
 
   return newRatings;
 }
