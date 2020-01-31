@@ -4,8 +4,7 @@
 
 import {initConfig, statisticConfig} from './config.js';
 import {getTimeComponents, wordFrom} from '../utilities.js';
-import {gameState} from '../data/data.js';
-import {setGameStatistics} from '../network/server-communication.js';
+import {loadGameStatistics, sendGameStatistics} from '../network/server-communication.js';
 
 // время, при привышении которого ответ не считается быстрым
 const LIMIT_TIME = statisticConfig.limitTime;
@@ -26,7 +25,7 @@ const FAIL_RATIO = statisticConfig.failRatio;
  *  state.statistics - массив с ответами пользователя
  * @return {string} - сообщение с результатом игры пользователем
  */
-export function getGameEndMessage(gameEndCode, state) {
+export async function getGameEndMessage(gameEndCode, state) {
 
   if (gameEndCode === initConfig.gameEndCode['failTries']) {
     return `<h2 class="result__title">Какая жалость!</h2>
@@ -40,11 +39,8 @@ export function getGameEndMessage(gameEndCode, state) {
 
   // если игра успешно завершена подсчитываем и возвращаем статистику
   const userResult = calcUserResult(state.statistics, state.wrongAnswer, state.totalQuestions);
-  const ratings = updateRatings(userResult.ball);
-
-  if (!ratings.length) {
-    return '';
-  }
+  // попытка получить и обновить рейтинг пользователей с сервера
+  const ratings = await updateRatings(userResult.ball);
 
   // получаем оставшееся время и рейтинг пользователя
   const [lastMinutes, lastSeconds] = getTimeComponents(state.lastTime);
@@ -87,10 +83,9 @@ export function calcUserResult(answers, wrongAnswer, questionsCount) {
  * @param {number} userRating - колличество набранных очков текущим пользователем
  * @return {array} - обновленный массив с результатами игр всех пользователей
  */
-export function updateRatings(userRating) {
-  // результаты игор других пользователей
-  // в gameState.userResults попадают во время предварительной загрузки ресурсов для игры
-  const otherResults = gameState.userResults;
+export async function updateRatings(userRating) {
+  // попытка получить данные с рейтингом с сервера
+  const otherResults = await loadGameStatistics();
 
   // если результат пользователя уже есть в общем рейтинге
   // рейтинг не обновляем
@@ -100,12 +95,15 @@ export function updateRatings(userRating) {
 
   // иначе добавляем результат пользователя в общий рейтинг
   const newRatings = [...otherResults];
-  newRatings.push(userRating);
-  // общий рейтинг отсортирован по убыванию
-  newRatings.sort((a, b) => b - a);
+  // находим позицию в которую нужно вставить новый результат
+  const indexInRating = (newRatings[newRatings.length - 1] < userRating) ? newRatings.findIndex((element) => element < userRating) : newRatings.length;
+  // вставляем результат текущего пользователя в общий массив результатов
+  newRatings.splice(indexInRating, 0, userRating);
 
-  setGameStatistics(newRatings);
+  // попытка отправить обновленные данные с результатами пользователей на сервер
+  await sendGameStatistics(newRatings);
 
+  // при успешной отправке возвращаем обновленный массив результатов рейтингов всех пользователей
   return newRatings;
 }
 

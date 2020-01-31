@@ -6,20 +6,25 @@
 const ELEMENT_ID = 'preload-spinner';
 const ELEMENT_CLASS = 'spinner';
 
+let animationContainer = null;
+
 /**
  * Функция показывает анимацию задержки игры при взаимодействии с сервером
+ * @param {string} message - сообщение, которое отображается внутри спиннера анимации загрузки
  */
-export function showLoadAnimation() {
-  let element = document.createElement('div');
-  element.id = ELEMENT_ID;
-  element.classList.add(ELEMENT_CLASS);
-  document.body.prepend(element);
+export function showLoadAnimation(message) {
+  animationContainer = document.createElement('div');
+  animationContainer.id = ELEMENT_ID;
+  animationContainer.classList.add(ELEMENT_CLASS);
+  animationContainer.innerHTML = message || 'Синхронизация<br>данных!';
+
+  document.body.append(animationContainer);
 }
 
 /**
  * Функция скрывает анимацию задержки игры при взаимодействии с сервером
  */
 export function removeLoadAnimation() {
-  let element = document.getElementById(ELEMENT_ID);
+  let element = animationContainer || document.getElementById(ELEMENT_ID);
   element.remove();
 }

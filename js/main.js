@@ -3,7 +3,7 @@
  * из которого инциализируются другие модули и запускается игра
  */
 import {startGame} from './controller.js';
-import {getGameData, getGameStatistics} from './network/server-communication.js';
+import {loadGameData} from './network/server-communication.js';
 import preloadResource from './network/resouce-preloader.js';
 import showModalError from './templates/modal-error.js';
 import {showLoadAnimation, removeLoadAnimation} from './templates/load-animation.js';
@@ -11,9 +11,8 @@ import {showLoadAnimation, removeLoadAnimation} from './templates/load-animation
 showLoadAnimation();
 
 // предзагрузка ресуров для игры:
-// данных по вопросам и статистики предыдущих игор пользователей
-Promise.all([getGameData(), getGameStatistics()])
-.then((gameData) => preloadResource(gameData[0]))
+loadGameData()
+.then((gameData) => preloadResource(gameData))
 .then(() => onSuccessLoad()).catch(() => onErrorLoad());
 
 /**

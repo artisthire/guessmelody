@@ -12,7 +12,7 @@ export const gameState = {
   totalQuestions: 10,
   endCode: 0,
   statistics: [],
-  userResults: []
+  gameResults: [] // временное хранилище результатов игор, пока не будет загружаться с сервера
 };
 
 // структура, хранящая результаты игры пользователя

@@ -3,7 +3,7 @@
  */
 import getScreenWelcome from './templates/welcome.js';
 import getLevelScreen from './templates/level-screen.js';
-import getResultScreen from './templates/result.js';
+import showResultScreen from './templates/result.js';
 
 import {gameState, questions} from './data/data.js';
 import {initConfig} from './data/config.js';
@@ -17,7 +17,7 @@ const screensContainer = document.querySelector('.main');
  * Отображает игровой экран
  * @param {object} element - контейнер, содержащий разметку, сгенерированную на основе шаблонов игровых окон
  */
-function renderScreen(element) {
+export function renderScreen(element) {
   // удаялем предыдущую разметку игрового окна
   screensContainer.textContent = '';
   // вставляются "дети", поскольку функция генерации разметки на основе тестовых шаблонов
@@ -51,7 +51,7 @@ export function nextLevel(selectedAnswerIndexes) {
     // если игра окончена, не переключаемся на следующий уровень
     // а отображаем окно с результатами игры
     if (endCode !== initConfig.gameEndCode['run']) {
-      renderScreen(getResultScreen(endCode, gameState));
+      showResultScreen(endCode, gameState);
       return;
     }
   }

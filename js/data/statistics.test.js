@@ -6,7 +6,8 @@ import {assert} from 'chai';
 import {calcUserResult, getGameEndMessage, updateRatings, getUserRating} from './statistics.js';
 import {initConfig, statisticConfig} from './config.js';
 
-describe('Проверка функции подсчета статистики', function () {
+
+describe('calcUserResult - проверка функции подсчета статистики', function () {
   // для подсчета результата игры массива ответов пользователя в целях тестирования
   function getFakeUserResult(quickAnswer, wrongAnswer, totalQuestions) {
     const quickRation = statisticConfig.quickRatio;
@@ -59,11 +60,13 @@ describe('Проверка функции подсчета статистики'
 describe('Проверка функции вывода результата игры', function () {
 
   it('Должен быть проигрыш, когда закончились попытки', function () {
-    assert.match(getGameEndMessage(initConfig.gameEndCode['failTries']), /попытки/);
+    getGameEndMessage(initConfig.gameEndCode['failTries'])
+    .then((message) => assert.match(message, /попытки/));
   });
 
   it('Должен быть проигрыш, когда законилось время', function () {
-    assert.match(getGameEndMessage(initConfig.gameEndCode['failTime']), /Время/);
+    getGameEndMessage(initConfig.gameEndCode['failTime'])
+    .then((message) => assert.match(message, /Время/));
   });
 
   it('Должен быть выигрыш, когда получены все ответы, не закончились попытки и время', function () {
@@ -75,35 +78,45 @@ describe('Проверка функции вывода результата иг
       {'time': 20000}, {'time': 30000}, {'time': 30000}, {'time': 30000}, {'time': 30000}
     ];
 
-    assert.match(getGameEndMessage(initConfig.gameEndCode['complete'], {statistics: fakeResults, wrongAnswer, totalQuestions, lastTime}), /меломан/);
+    getGameEndMessage(initConfig.gameEndCode['complete'], {statistics: fakeResults, wrongAnswer, totalQuestions, lastTime})
+    .then((message) => assert.match(message, /меломан/));
   });
 });
 
-describe('Проверка функции добавления рейтинга пользователя в общий рейтинг всех пользователей', function () {
+describe('updateRatings - проверка функции добавления рейтинга пользователя в общий рейтинг', function () {
 
   it('Если нет других результатов, должен создаваться новый рейтинг', function () {
-    assert.deepEqual(updateRatings(10), [10]);
+    updateRatings(10)
+    .then((ratings) => assert.deepEqual(ratings, [10]));
   });
 
-  it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
-    updateRatings(11);
-    updateRatings(8);
 
-    assert.deepEqual(updateRatings(10), [11, 10, 8]);
+  it('Если такой рейтинг в массиве результатов есть, массив меняться не должен', function () {
+    updateRatings(10)
+    .then(() => updateRatings(9))
+    .then(() => updateRatings(9))
+    .then((ratings) => assert.deepEqual(ratings, [10, 9]));
   });
 
   it('Если рейтинга текущего пользователя в общем массиве нет, он должен в него добавляться', function () {
-    assert.deepEqual(updateRatings(7), [11, 10, 8, 7]);
+    updateRatings(10)
+    .then(() => updateRatings(9))
+    .then(() => updateRatings(8))
+    .then((ratings) => assert.deepEqual(ratings, [10, 9, 8]));
   });
 
+
   it('Общий рейтинг отсортирован по убыванию', function () {
-    assert.sameOrderedMembers(updateRatings(7), [11, 10, 8, 7]);
+    updateRatings(10)
+    .then(() => updateRatings(8))
+    .then(() => updateRatings(9))
+    .then((ratings) => assert.sameOrderedMembers(ratings, [10, 9, 8]));
   });
 
 });
 
 // Для тестирования внутренней функции подсчета рейтинга пользователя
-describe('Проверка функции расчета рейтинга текущего пользователя игры', function () {
+describe('getUserRating - проверка функции расчета рейтинга текущего пользователя игры', function () {
 
   it('Возвращает объект вида {positionInRating: .., totalUsers: .., percentRating: ..}', function () {
     assert.containsAllKeys(getUserRating([11, 10, 8, 6, 5, 4], 6), ['positionInRating', 'totalUsers', 'percentRating']);

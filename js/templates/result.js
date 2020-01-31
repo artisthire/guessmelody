@@ -1,9 +1,11 @@
 /**
  * Модуль содержит шаблон разметки и функцию инициализации финального окна с результатом игры
  */
-import {startGame} from '../controller.js';
+import {startGame, renderScreen} from '../controller.js';
 import {getGameEndMessage} from '../data/statistics.js';
 import {getElementFromTemplate} from '../utilities.js';
+import showModalError from './modal-error.js';
+import {showLoadAnimation, removeLoadAnimation} from './load-animation.js';
 
 // Общий шаблон разметки окна с результатом игры
 const resultScreenTemplate = (message) => `<section class="result">
@@ -35,18 +37,28 @@ function initResultScreen(container) {
 }
 
 /**
- * Функция генерации разметки окна результатов игры и добавления к нему соответствующих обработчиков
+ * Функция отображения окна результатов игры и добавления к нему соответствующих обработчиков
  * @param {number} endCode - числовой код, соответствующий статусу завершения игры, см. объект initConfig.gameEndCode
  * @param {object} gameState - объект, хранящий состояние игрового процесса (время, колличество ошибок и т.д.)
- * @return {object} - DOM-элемент контейнер с разметкой окна результатов игры, над которым выполнена инциализация (добавлены обработчики событий)
  */
-export default function getResultScreen(endCode, gameState) {
-  // по коду завершения игры получить шаблон разметки сообщения об окончании игры
-  const endMessage = getGameEndMessage(endCode, gameState);
+export default function showResultScreen(endCode, gameState) {
+  showLoadAnimation();
 
-  // получаем и инициализируем DOM-элемент с результатом игры
-  let resultScreenElement = getElementFromTemplate(resultScreenTemplate(endMessage));
-  resultScreenElement = initResultScreen(resultScreenElement);
+  // вычислить результат завершения игры
+  getGameEndMessage(endCode, gameState)
+  .then((endMessage) => renderResultScreen(endMessage))
+  .catch(() => {
+    renderResultScreen(`<h2 class="result__title">Ошибка сихронизации данных!</h2>`);
+    showModalError();
+    return;
+  });
 
-  return resultScreenElement;
+  function renderResultScreen(message) {
+    // убираем анимацию сихронизации данных
+    removeLoadAnimation();
+    // получаем и инициализируем DOM-элемент с результатом игры
+    let resultScreenElement = getElementFromTemplate(resultScreenTemplate(message));
+    resultScreenElement = initResultScreen(resultScreenElement);
+    renderScreen(resultScreenElement);
+  }
 }
