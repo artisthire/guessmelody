@@ -59,3 +59,18 @@ export function wordFrom(num, word) {
   const cases = [2, 0, 1, 1, 1, 2];
   return `${num} ${word[(num % 100 > 4 && num % 100 < 20) ? 2 : cases[(num % 10 < 5) ? num % 10 : 5]]}`;
 }
+
+/**
+ * Функция расчета параметров анимации SVG-элемента отображающим оставшееся время
+ * SVG-элемент в верстке представлен в виде круга, длинна которого уменьшается с уменьшением оставшегося времени
+ * Убывание круга анимируется увеличением значения stroke-dashoffset при постоянном stroke-dasharray равном длинне окружности
+ * @param {number} timePercent - число от 0 до 1, представляющее отношение оставшегося времени к общему времени игры
+ * @param {number} circleLength - общая длинна окружности SVG єлемента, получается вызовом метода getTotalLength() на SVG-элементе круга
+ * @return {object} - объект содержащий числовые значения для stroke-dasharray и stroke-dashoffset
+ */
+export function getTimeAnimationRadius(timePercent, circleLength) {
+  const stroke = Math.ceil(circleLength);
+  const offset = Math.floor((1 - timePercent) * stroke);
+
+  return {stroke, offset};
+}
