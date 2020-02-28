@@ -10,7 +10,7 @@ export default class AbstractView {
    * Абстрактный метод возвращающий строку с разметкой предстваления
    * В конкретных представлениях должен быть переопределен
    */
-  get template() {
+  get _template() {
     throw new Error('Абстрактный метод возвращающий строку с разметкой представления.');
   }
 
@@ -26,8 +26,8 @@ export default class AbstractView {
       return this._element;
     }
 
-    let container = this.render(this.template);
-    container = this.bind(container);
+    let container = this._render(this._template);
+    container = this._bind(container);
     // используется children чтобы "вынять" все дочерние элементы из контейнера DIV
     // т.к. метод render возвращает элементы на основе шаблона внутри временного элемента DIV
     // и если DIV с сгенерированным содержимым вставлять в разметку как есть, то может сломаться верстка
@@ -41,7 +41,7 @@ export default class AbstractView {
    * @param {string} template - строка, содержащая HTML-разметку элемента
    * @return {object} - DOM-элемент, сгенерированный на основе шаблона
    */
-  render(template) {
+  _render(template) {
     const container = document.createElement('div');
     container.innerHTML = template;
 
@@ -54,7 +54,7 @@ export default class AbstractView {
    * @param {object} container - общий контейнер, содержащий DOM-элементы представления к которым нужно добавить обработчики
    * @return {object} - контейнер с DOM-элементами, на которые, при необходимости, добавлены обработчики
    */
-  bind(container) {
+  _bind(container) {
     return container;
   }
 }
