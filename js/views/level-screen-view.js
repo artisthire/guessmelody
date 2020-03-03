@@ -105,6 +105,14 @@ export default class LevelScreenView extends AbstractView {
   }
 
   /**
+   * Возвращает массив порядковых номеров (индексов) из общего списка вариантов ответов, которые были выбранны пользователем
+   * @return {array} - числовой массив с индексами элементов из вариантов ответов, которые были выбраны пользователем
+   */
+  get answersSelected() {
+    return this._answerBtns.map((btn) => btn.checked);
+  }
+
+  /**
    * Переопределение абстрактного метода родителя
    * Возвращает строку с шаблоном разметки окна игрового уровня
    * В зависимости от типа вопросов на уровне (на выбор Артиста или Жанра)
@@ -204,7 +212,7 @@ export default class LevelScreenView extends AbstractView {
       }
 
       // устанавливаем признак, выбран ли хоть один ответ
-      this._answerSelected = !!this._getSelectedAnswerIdexes().length;
+      this._answerSelected = !!this.answersSelected.find((select) => select === true);
 
       // разрешаем нажать кнопку "Ответ" если выбран хотя бы один из ответов
       btnSubmit.disabled = !this._answerSelected;
@@ -224,19 +232,5 @@ export default class LevelScreenView extends AbstractView {
     if (this._answerSelected) {
       this.onAnswerSubmit();
     }
-  }
-
-  /**
-   * Возвращает массив порядковых номеров (индексов) из общего списка вариантов ответов, которые были выбранны пользователем
-   * @return {array} - числовой массив с индексами элементов из вариантов ответов, которые были выбраны пользователем
-   */
-  _getSelectedAnswerIdexes() {
-    return this._answerBtns.reduce((indexes, btn, index) => {
-      if (btn.checked) {
-        indexes.push(index);
-      }
-
-      return indexes;
-    }, []);
   }
 }
