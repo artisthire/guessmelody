@@ -74,3 +74,35 @@ export function getTimeAnimationRadius(timePercent, circleLength) {
 
   return {stroke, offset};
 }
+
+/**
+ * Функция показа представления игрового экрана
+ * @param {array} elements - DOM-элементы, которые нужно отображить на экране
+ * @param {object} container - DOM-элемент контейнер, внутри которого будет отображено представление
+ * @param {boolean} containerClear - флаг очистки предыдущего содержимого контейнера
+ */
+export function showScreen(elements, container, containerClear = true) {
+
+  if (containerClear) {
+    container.textContent = '';
+  }
+
+  if (!Array.isArray(elements)) {
+    elements = Array.from(elements);
+  }
+
+  container.append(...elements);
+}
+
+/**
+ * Функция удаления представления игрового экрана
+ * @param {array} elements - DOM-элементы, которые нужно убрать с экрана
+ */
+export function removeScreen(elements) {
+
+  if (!Array.isArray(elements)) {
+    elements = Array.from(elements);
+  }
+
+  elements.forEach((element) => element.remove());
+}
