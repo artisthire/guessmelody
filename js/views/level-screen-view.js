@@ -4,37 +4,11 @@
  */
 
 import AbstractView from './abstract-view.js';
-import {getTimeComponents} from '../utilities.js';
-
-// шаблон разметки шапки игровых уровней
-const headerTemplate = (state) => {
-  const [totalMinuts, totalSeconds] = getTimeComponents(state.lastTime);
-
-  return `<section class="game game--artist">
-    <header class="game__header">
-      <a class="game__back" href="#">
-        <span class="visually-hidden">Сыграть ещё раз</span>
-        <img class="game__logo" src="/img/melody-logo-ginger.png" alt="Угадай мелодию">
-      </a>
-
-      <svg xmlns="http://www.w3.org/2000/svg" class="timer" viewBox="0 0 780 780">
-        <circle class="timer__line" cx="390" cy="390" r="370" style="filter: url(.#blur); transform: rotate(-90deg) scaleY(-1); transform-origin: center">
-      </svg>
-
-      <div class="timer__value" xmlns="http://www.w3.org/1999/xhtml">
-        <span class="timer__mins">${totalMinuts}</span>
-        <span class="timer__dots">:</span>
-        <span class="timer__secs">${totalSeconds}</span>
-      </div>
-
-      <div class="game__mistakes">
-        ${new Array(state.wrongAnswer + 1).join('<div class="wrong"></div>')}
-      </div>
-    </header>`;
-};
+import LevelHeaderScreenView from './level-header-screen-view.js';
 
 // шаблон разметки игрового уровня на выбор Артиста по аудиотреку
-const selectArtistTemplate = (question) => `<section class="game__screen">
+const selectArtistTemplate = (question) => `<section class="game game--artist">
+  <section class="game__screen">
     <h2 class="game__title">${question.title}</h2>
     <div class="game__track">
       <button class="track__button track__button--pause" type="button"></button>
@@ -57,11 +31,12 @@ const selectArtistTemplate = (question) => `<section class="game__screen">
 </section>`;
 
 // шаблон разметки игрового уровня на выбор Жанра аудиотреков
-const selectGenreTemplate = (question) => `<section class="game__screen">
-  <h2 class="game__title">${question.title}</h2>
-  <form class="game__tracks">
+const selectGenreTemplate = (question) => `<section class="game game--artist">
+  <section class="game__screen">
+    <h2 class="game__title">${question.title}</h2>
+    <form class="game__tracks">
 
-  ${question.answers.map((answer, index) =>
+      ${question.answers.map((answer, index) =>
     `<div class="track">
       <button class="track__button ${index === 0 ? 'track__button--pause' : 'track__button--play'}" type="button"></button>
       <div class="track__status">
@@ -73,8 +48,8 @@ const selectGenreTemplate = (question) => `<section class="game__screen">
       </div>
     </div>`).join('')}
 
-    <button class="game__submit button" type="submit" disabled>Ответить</button>
-  </form>
+      <button class="game__submit button" type="submit" disabled>Ответить</button>
+    </form>
   </section>
 </section>`;
 
@@ -82,19 +57,60 @@ export default class LevelScreenView extends AbstractView {
 
   constructor(gameState, levelQuestion) {
     super();
-    this.gameState = gameState;
     this.levelQuestion = levelQuestion;
+
+    this._levelHeaderElement = new LevelHeaderScreenView(gameState).element;
+    this._levelHeaderElement.onBackBtnClick = this.onRestartGame;
 
     // содержит признак выбора одного из ответов
     // по нему разрешается переход на следующий уровень игры
-    this._answerSelected = false;
+    this._isAnswerSelected = false;
+  }
+
+  /**
+   * Переопределение метода родителя по получению DOM-элементов игрового уровня
+   * Внедряет разметку шапки в разметку теля уровня игры
+   * @return {object} - DOM-элемент, содержащий общую разметку шапки и тела уровня игры
+   */
+  get element() {
+    if (this._fullLevelElement) {
+      return this._fullLevelElement;
+    }
+
+    // получаем разметку тела уровня игры
+    this._fullLevelElement = super.element;
+    // внедряем в нее разметку шапки
+    this._fullLevelElement.prepend(this._levelHeaderElement);
+    return this._fullLevelElement;
+  }
+
+  /**
+   * Возвращает массив булевых значений, которые указывают был ли выбран соответствующий по порядку ответ из предоставленных вариантов
+   * @return {array} - массив булевых значений, где каждому из вариантов ответов по порядку устанавливается признак был ли он выбран пользователем
+   */
+  get answersSelected() {
+    return this._answerBtns.map((btn) => btn.checked);
+  }
+
+  /**
+   * Обновляет состояние шапки игрового уровня
+   * @param {object} gameState - объект состояния игры
+   */
+  updateHeader(gameState) {
+    // удаляем предыдущий элемент шапки игрового уровня
+    this._levelHeaderElement.remove();
+
+    // инициализируем и добавляем новую шапку
+    this._levelHeaderElement = new LevelHeaderScreenView(gameState).element;
+    this._levelHeaderElement.onBackBtnClick = this.onRestartGame;
+    this._fullLevelElement.prepend(this._levelHeaderElement);
   }
 
   /**
    * Обработчик клика на кнопку начала игры заново
    * Должен переопределен для правильной реакции на перезапуск игры
    */
-  onBackBtnClick() {
+  onRestartGame() {
   }
 
   /**
@@ -105,26 +121,13 @@ export default class LevelScreenView extends AbstractView {
   }
 
   /**
-   * Возвращает массив порядковых номеров (индексов) из общего списка вариантов ответов, которые были выбранны пользователем
-   * @return {array} - числовой массив с индексами элементов из вариантов ответов, которые были выбраны пользователем
-   */
-  get answersSelected() {
-    return this._answerBtns.map((btn) => btn.checked);
-  }
-
-  /**
    * Переопределение абстрактного метода родителя
    * Возвращает строку с шаблоном разметки окна игрового уровня
    * В зависимости от типа вопросов на уровне (на выбор Артиста или Жанра)
-   * Текущего состояния игры и перечня вопросов
    */
   get _template() {
     // по типу полученных вопросов выбрать соответствующий шаблон разметки
-    const bodyTemplate = (this.levelQuestion.type === 'artist') ? selectArtistTemplate : selectGenreTemplate;
-    // получаем общую текстовоую разметку шапки и тела уровня игры
-    const fullTemplate = headerTemplate(this.gameState) + bodyTemplate(this.levelQuestion);
-
-    return fullTemplate;
+    return (this.levelQuestion.type === 'artist') ? selectArtistTemplate : selectGenreTemplate;
   }
 
   /**
@@ -134,32 +137,8 @@ export default class LevelScreenView extends AbstractView {
    * @return {object} - тот же DOM-элемент, к которому навешены нужные обработчики событий
    */
   _bind(container) {
-    // сначала навешиваем обработчики для шапки игрового окна
-    let bindenElements = this._bindScreenHeader(container);
-    // далее в зависимости от типа вопросов, навешиваем обработчик для тела игрового окна
-    bindenElements = (this.levelQuestion.type === 'artist') ?
-      this._bindScreenSelectArtist(bindenElements) :
-      this._bindScreenSelectGenre(bindenElements);
-
-    return bindenElements;
-  }
-
-
-  /**
-   * Метод инициализации DOM-элементов шапки игрового уровня
-   * @param {object} container - DOM-элемент контейнер, содержащий DOM разметку, сгенерированную на основе шаблона
-   * @return {object} - DOM-элемент контейнер с разметкой игрового окна, над которым выполнена инциализация
-   */
-  _bindScreenHeader(container) {
-    const backBtn = container.querySelector('.game__back');
-
-    // обработчик перезапуска игры
-    backBtn.addEventListener('click', (evt) => {
-      evt.preventDefault();
-      this.onBackBtnClick();
-    });
-
-    return container;
+    // в зависимости от типа вопросов, навешиваем обработчик для тела игрового окна
+    return (this.levelQuestion.type === 'artist') ? this._bindScreenSelectArtist(container) : this._bindScreenSelectGenre(container);
   }
 
   /**
@@ -180,7 +159,7 @@ export default class LevelScreenView extends AbstractView {
 
       // устанавливаем признак, что был выбран ответ
       // для того, чтобы разрешить обработку подтверждения ответа
-      this._answerSelected = true;
+      this._isAnswerSelected = true;
 
       // при клике на любую из кнопок вариантов ответов, выбор ответа подтверждается автоматически
       form.submit();
@@ -212,10 +191,10 @@ export default class LevelScreenView extends AbstractView {
       }
 
       // устанавливаем признак, выбран ли хоть один ответ
-      this._answerSelected = !!this.answersSelected.find((select) => select === true);
+      this._isAnswerSelected = !!this.answersSelected.find((select) => select === true);
 
       // разрешаем нажать кнопку "Ответ" если выбран хотя бы один из ответов
-      btnSubmit.disabled = !this._answerSelected;
+      btnSubmit.disabled = !this._isAnswerSelected;
     });
 
     form.addEventListener('submit', (evt) => {
@@ -229,7 +208,7 @@ export default class LevelScreenView extends AbstractView {
     evt.preventDefault();
 
     // ответ подтверждается, если выбран хотябы один из вариантов ответа
-    if (this._answerSelected) {
+    if (this._isAnswerSelected) {
       this.onAnswerSubmit();
     }
   }
