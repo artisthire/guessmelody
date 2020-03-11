@@ -28,10 +28,10 @@ export default class AbstractView {
 
     let container = this._render(this._template);
     container = this._bind(container);
-    // используется children чтобы "вынять" все дочерние элементы из контейнера DIV
+    // используется firstElementChild чтобы "вынять" дочерний элементы из контейнера DIV
     // т.к. метод render возвращает элементы на основе шаблона внутри временного элемента DIV
     // и если DIV с сгенерированным содержимым вставлять в разметку как есть, то может сломаться верстка
-    this._element = container.children;
+    this._element = container.firstElementChild;
 
     return this._element;
   }
