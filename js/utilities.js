@@ -75,34 +75,19 @@ export function getTimeAnimationRadius(timePercent, circleLength) {
   return {stroke, offset};
 }
 
+// контейнер, в котором отображаются все игровые окна
+const screensContainer = document.querySelector('.main');
+
 /**
  * Функция показа представления игрового экрана
- * @param {array} elements - DOM-элементы, которые нужно отображить на экране
- * @param {object} container - DOM-элемент контейнер, внутри которого будет отображено представление
+ * @param {object} element - DOM-элемент контейнер с разметкой, который нужно отобразить на экране
  * @param {boolean} containerClear - флаг очистки предыдущего содержимого контейнера
  */
-export function showScreen(elements, container, containerClear = true) {
+export function showScreen(element, containerClear = true) {
 
   if (containerClear) {
-    container.textContent = '';
+    screensContainer.textContent = '';
   }
 
-  if (!Array.isArray(elements)) {
-    elements = Array.from(elements);
-  }
-
-  container.append(...elements);
-}
-
-/**
- * Функция удаления представления игрового экрана
- * @param {array} elements - DOM-элементы, которые нужно убрать с экрана
- */
-export function removeScreen(elements) {
-
-  if (!Array.isArray(elements)) {
-    elements = Array.from(elements);
-  }
-
-  elements.forEach((element) => element.remove());
+  screensContainer.append(element);
 }
