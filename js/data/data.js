@@ -3,6 +3,19 @@
  */
 import staticGameData from './game-static-data.js';
 
+export const INITIAL_GAME = {
+  level: 0,
+  totalTries: 3, // колличество жизней
+  totalTime: 5 * 60,
+  statistics: []
+};
+
+// структура, хранящая результаты игры пользователя
+export const levelResultTemplate = {
+  answers: [],
+  time: 0
+};
+
 // состояние игры
 // в statistics добавляются результаты ответов по каждому уровню
 export const gameState = {

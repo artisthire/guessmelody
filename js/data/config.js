@@ -10,6 +10,8 @@ const initConfig = {
   gameEndCode: {'run': 0, 'complete': 1, 'failTries': 2, 'failTime': 3} // коды завершения игры
 };
 
+
+
 // данные для подсчета результатов игры пользователя
 const statisticConfig = {
   limitTime: 30 * 1000, // время, до достижения которого ответ считается быстрым
