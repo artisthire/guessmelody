@@ -4,6 +4,7 @@
  */
 
 import AbstractView from './abstract-view.js';
+import TrackContoller from '../process/tracks-controller.js';
 
 // шаблон разметки игрового уровня на выбор Артиста по аудиотреку
 const selectArtistTemplate = (question) => `<section class="game game--artist">
@@ -57,6 +58,8 @@ export default class LevelScreenView extends AbstractView {
   constructor(levelQuestion) {
     super();
     this.levelQuestion = levelQuestion;
+
+    this.trackController = new TrackContoller(this.element);
 
     // содержит признак выбора одного из ответов
     // по нему разрешается переход на следующий уровень игры
