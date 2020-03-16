@@ -4,7 +4,6 @@
  */
 
 import AbstractView from './abstract-view.js';
-import LevelHeaderScreenView from './level-header-screen-view.js';
 
 // шаблон разметки игрового уровня на выбор Артиста по аудиотреку
 const selectArtistTemplate = (question) => `<section class="game game--artist">
@@ -55,33 +54,13 @@ const selectGenreTemplate = (question) => `<section class="game game--artist">
 
 export default class LevelScreenView extends AbstractView {
 
-  constructor(gameState, levelQuestion) {
+  constructor(levelQuestion) {
     super();
     this.levelQuestion = levelQuestion;
-
-    this._levelHeaderElement = new LevelHeaderScreenView(gameState).element;
-    this._levelHeaderElement.onBackBtnClick = this.onRestartGame;
 
     // содержит признак выбора одного из ответов
     // по нему разрешается переход на следующий уровень игры
     this._isAnswerSelected = false;
-  }
-
-  /**
-   * Переопределение метода родителя по получению DOM-элементов игрового уровня
-   * Внедряет разметку шапки в разметку теля уровня игры
-   * @return {object} - DOM-элемент, содержащий общую разметку шапки и тела уровня игры
-   */
-  get element() {
-    if (this._fullLevelElement) {
-      return this._fullLevelElement;
-    }
-
-    // получаем разметку тела уровня игры
-    this._fullLevelElement = super.element;
-    // внедряем в нее разметку шапки
-    this._fullLevelElement.prepend(this._levelHeaderElement);
-    return this._fullLevelElement;
   }
 
   /**
@@ -90,27 +69,6 @@ export default class LevelScreenView extends AbstractView {
    */
   get answersSelected() {
     return this._answerBtns.map((btn) => btn.checked);
-  }
-
-  /**
-   * Обновляет состояние шапки игрового уровня
-   * @param {object} gameState - объект состояния игры
-   */
-  updateHeader(gameState) {
-    // удаляем предыдущий элемент шапки игрового уровня
-    this._levelHeaderElement.remove();
-
-    // инициализируем и добавляем новую шапку
-    this._levelHeaderElement = new LevelHeaderScreenView(gameState).element;
-    this._levelHeaderElement.onBackBtnClick = this.onRestartGame;
-    this._fullLevelElement.prepend(this._levelHeaderElement);
-  }
-
-  /**
-   * Обработчик клика на кнопку начала игры заново
-   * Должен переопределен для правильной реакции на перезапуск игры
-   */
-  onRestartGame() {
   }
 
   /**
@@ -127,7 +85,7 @@ export default class LevelScreenView extends AbstractView {
    */
   get _template() {
     // по типу полученных вопросов выбрать соответствующий шаблон разметки
-    return (this.levelQuestion.type === 'artist') ? selectArtistTemplate : selectGenreTemplate;
+    return (this.levelQuestion.type === 'artist') ? selectArtistTemplate(this.levelQuestion) : selectGenreTemplate(this.levelQuestion);
   }
 
   /**
@@ -162,7 +120,7 @@ export default class LevelScreenView extends AbstractView {
       this._isAnswerSelected = true;
 
       // при клике на любую из кнопок вариантов ответов, выбор ответа подтверждается автоматически
-      form.submit();
+      this.onAnswerSubmit();
     });
 
     // обработчик подтверждения ответа

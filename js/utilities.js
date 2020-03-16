@@ -34,12 +34,12 @@ export function getRandomIntInclusive(min = 0, max) {
  */
 export function getTimeComponents(time) {
   const date = new Date();
-  date.setTime(time);
+  date.setTime(time * 1000);
   const timeComponents = date.toLocaleTimeString('en-US', {hour12: false}).split(':');
   const minuts = timeComponents[1];
   const seconds = timeComponents[2];
 
-  return [minuts, seconds];
+  return {minuts, seconds};
 }
 
 /**

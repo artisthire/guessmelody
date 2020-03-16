@@ -4,11 +4,14 @@
  */
 
 import AbstractView from './abstract-view.js';
-import {getTimeComponents} from '../utilities.js';
+import {GAME_PARAM} from '../data/config.js';
+import {getTimeComponents, getTimeAnimationRadius} from '../utilities.js';
+
+const LOW_TIME_CLASS = 'timer__value--finished';
 
 // шаблон разметки шапки игровых уровней
 const headerTemplate = (state) => {
-  const [totalMinuts, totalSeconds] = getTimeComponents(state.lastTime);
+  const {minuts, seconds} = getTimeComponents(state.currentTime);
 
   return `<header class="game__header">
       <a class="game__back" href="#">
@@ -21,13 +24,13 @@ const headerTemplate = (state) => {
       </svg>
 
       <div class="timer__value" xmlns="http://www.w3.org/1999/xhtml">
-        <span class="timer__mins">${totalMinuts}</span>
+        <span class="timer__mins">${minuts}</span>
         <span class="timer__dots">:</span>
-        <span class="timer__secs">${totalSeconds}</span>
+        <span class="timer__secs">${seconds}</span>
       </div>
 
       <div class="game__mistakes">
-        ${new Array(state.wrongAnswer + 1).join('<div class="wrong"></div>')}
+        ${new Array(state.wrong + 1).join('<div class="wrong"></div>')}
       </div>
     </header>`;
 };
@@ -45,6 +48,29 @@ export default class LevelHeaderScreenView extends AbstractView {
    * Должен переопределен для правильной реакции на перезапуск игры
    */
   onBackBtnClick() {
+  }
+
+  /**
+   * Отдельный метод для обновления значения оставшегося времени игры
+   * @param {object} state - объект состояния игры
+   */
+  updateTime(state) {
+    const timerRootElement = this.element.querySelector('.timer__value');
+    const timeMinutsElement = this.element.querySelector('.timer__mins');
+    const timeSecondsElement = this.element.querySelector('.timer__secs');
+
+    if (state.currentTime <= GAME_PARAM.lowTime && !timerRootElement.classList.contains(LOW_TIME_CLASS)) {
+      timerRootElement.classList.add(LOW_TIME_CLASS);
+    }
+
+    // получаем компоненты времени
+    const {minuts, seconds} = getTimeComponents(state.currentTime);
+    // меняем содержимое элементов
+    timeMinutsElement.textContent = minuts;
+    timeSecondsElement.textContent = seconds;
+
+    // обновляем состояние анимационного круга оставшегося времени
+    this._updateTimeCircle(state.totalTime, state.currentTime);
   }
 
   /**
@@ -72,5 +98,21 @@ export default class LevelHeaderScreenView extends AbstractView {
     });
 
     return container;
+  }
+
+  /**
+   * Метод обновления анимационного круга, иллюстирующего колличество оставшегося времени
+   * @param {number} totalTime - общее колличество игрового времени (сколько всего доступно для игры)
+   * @param {number} currentTime - текущее значение игрового времени
+   */
+  _updateTimeCircle(totalTime, currentTime) {
+    const timeCircleElement = this.element.querySelector('.timer__line');
+    // находим значение длинны анимационной окружности
+    const circleLength = Math.ceil(2 * Math.PI * timeCircleElement.getAttribute('r'));
+    // значения для установки стилей в SVG-элементе окружности
+    const {stroke, offset} = getTimeAnimationRadius(currentTime / totalTime, circleLength);
+
+    timeCircleElement.style.strokeDasharray = `${stroke}px`;
+    timeCircleElement.style.strokeDashoffset = `${offset}px`;
   }
 }

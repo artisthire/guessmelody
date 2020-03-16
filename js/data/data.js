@@ -2,11 +2,14 @@
  * Содержит структуры данных для использования в игре
  */
 import staticGameData from './game-static-data.js';
+import {GAME_PARAM} from './config.js';
 
-export const INITIAL_GAME = {
-  level: 0,
-  totalTries: 3, // колличество жизней
-  totalTime: 5 * 60,
+export const INITIAL_STATE = {
+  level: GAME_PARAM.initLevel,
+  wrong: 0, // колличество неправильных ответов
+  lives: GAME_PARAM.totalLives,
+  totalTime: GAME_PARAM.totalTime,
+  currentTime: GAME_PARAM.totalTime,
   statistics: []
 };
 
