@@ -63,15 +63,15 @@ export function getTimeAnimationRadius(timePercent, circleLength) {
   return {stroke, offset};
 }
 
+// контейнер, в котором отображаются все игровые окна
+const screensContainer = document.querySelector('.main');
+
 /**
  * Функция показа представления игрового экрана
  * @param {object} element - DOM-элемент контейнер с разметкой, который нужно отобразить на экране
  * @param {boolean} containerClear - флаг очистки предыдущего содержимого контейнера
  */
 export function showScreen(element, containerClear = true) {
-
-  // контейнер, в котором отображаются все игровые окна
-  const screensContainer = document.querySelector('.main');
 
   if (containerClear) {
     screensContainer.textContent = '';
