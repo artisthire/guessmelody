@@ -1,7 +1,7 @@
 /**
  * Модуль содержит модель для использования на игровых уровнях
  */
-import {INITIAL_STATE, levelResultTemplate, questions} from '../data/data.js';
+import {INITIAL_STATE, questions} from '../data/data.js';
 
 export default class GameModel {
 
@@ -33,7 +33,7 @@ export default class GameModel {
    */
   set statistics(levelStatistics) {
     // на основе типовой структуры создаем объект с массивом ответов и временем прохождения игры
-    const result = Object.assign({}, levelResultTemplate);
+    const result = {answers: [], time: 0};
     result.answers.push(levelStatistics.answers);
     result.time = levelStatistics.time;
 
@@ -75,7 +75,7 @@ export default class GameModel {
    * @return {boolean} - true - игровые жизни закончились, false - есть еще игровые жизни
    */
   isDie() {
-    return this._state.wrong >= this._state.lives;
+    return this._state.wrong > this._state.lives;
   }
 
   /**

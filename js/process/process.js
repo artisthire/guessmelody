@@ -1,75 +1,39 @@
 /**
  * Модуль содержит функции управления игровы процессом
  */
-
-import {initConfig, statisticConfig} from '../data/config.js';
-import {gameState, levelResult} from '../data/data.js';
+import {GAME_PARAM} from '../data/config.js';
 
 /**
- * Функция уменьшает колличество оставшихся жизней (увеличивает колличество ошибочных ответов)
- * @return {number} - колличество ошибок
+ * Проверяет был ли ответ на вопросы уровня быстрым или медленным
+ * Скорость ответа сравнивается с заданным параметров в игре
+ * @param {number} levelTime - скорость ответа на вопрос на текущем уровен игры
+ * @return {boolean} - true - ответ дан быстро, false - медленно
  */
-export function removeGameLife() {
-  // если превышено колличество ошибочных ответов возвращаем сигнал об окончании игровых жизней
-  // иначе увеличиваем колличество ошибок
-  if (gameState.wrongAnswer === initConfig.totalTries) {
-    gameState.wrongAnswer = -1;
-  } else {
-    gameState.wrongAnswer++;
-  }
-
-  return gameState.wrongAnswer;
-}
-
-// дает информацию о скорости ответа пользователя на вопрос ("быстрый" или "медленный" ответ с точки зрения игровой логики)
-export const levelSpeed = {
-  setStartTimer() {
-    this.startTime = new Date().getTime();
-  },
-  getAnswerSpeed() {
-    return (new Date().getTime() - this.startTime) <= statisticConfig.limitTime;
-  }
-};
-
-/**
- * Сохраняет статистику в общую структура данных о выбранных пользователем ответов по текущему уровню игры
- * @param {array} selectedAnswerIndexes - порядковые индесы номеров выбранных пользователем ответов (передаются при переключении на следующий уровень)
- * @param {number} levelTime - колличество миллисекунд, потраченных на ответ пользователя на текущем уровне игры
- * @param {array} levelAnswers - все варианты ответов, которые были доспупны на текущем уровне
- */
-export function saveAnswerStatistic(selectedAnswerIndexes, levelTime, levelAnswers) {
-  const selectedAnswers = selectedAnswerIndexes.map((answerIndex) => levelAnswers[answerIndex]);
-
-  const currentLevelResult = Object.assign({}, levelResult);
-  currentLevelResult.answers = selectedAnswers;
-  currentLevelResult.time = levelTime;
-
-  gameState.statistics.push(currentLevelResult);
+export function isFastAnswer(levelTime) {
+  return levelTime < GAME_PARAM.limitTime;
 }
 
 /**
  * Сравнивает выбранные пользователем ответы с доступными вариантами ответов на текущем уровне игры
  * Возвращает результат, была ли ошибка при ответах
- * @param {array} selectedAnswerIndexes - порядковые индесы номеров выбранных пользователем ответов
- * @param {array} levelAnswers - все варианты ответов, которые были доспупны на текущем уровне
- * @return {boolean} - true - ответы содержать неправильные варианты, false - все ответы правильные
+ * @param {array} selectedAnswers - массив boolean значений, где true - DOM-элемент варианта ответа был выбран пользователем
+ * @param {array} levelAnswers - варианты ответов, которые были доспупны на текущем уровне
+ * @return {boolean} - true - ответы содержат неправильные варианты, false - все ответы правильные
  */
-export function checkWrongAnswer(selectedAnswerIndexes, levelAnswers) {
-  // получить порядковые идексы правильных вариантов ответов из общего массива вариантов ответов
-  const trueAnswersIndexes = levelAnswers.reduce((indexes, answer, index) => {
-    if (answer.isCorrect) {
-      indexes.push(index);
-    }
-    return indexes;
-  }, []);
+export function hasWrongAnswer(selectedAnswers, levelAnswers) {
+  // ищет первый правильный варинат ответа, который не был выбран пользователем
+  const wrongAnswer = levelAnswers.find((levelAnswer, index) => levelAnswer.isCorrect !== selectedAnswers[index]);
 
-  // допущена ошибка, если колличество выбранных варинатов не соответствует колличеству правильных ответов
-  if (selectedAnswerIndexes.length !== trueAnswersIndexes.length) {
-    return true;
-  }
+  return wrongAnswer !== undefined;
+}
 
-  // допущена ошибка, если в выбранных ответах есть неправильные
-  const hasWrongAnswer = isFinite(trueAnswersIndexes.find((trueAnswerIndex) => !selectedAnswerIndexes.includes(trueAnswerIndex)));
-
-  return hasWrongAnswer;
+/**
+ * Функция сопоставляет ответы выбранные пользователем со всеми вариантами доступных ответов
+ * И из всех доступных варинатов возвращает только те, что выбрал пользователь
+ * @param {array} selectedAnswers - массив boolean значений, где true - DOM-элемент варианта ответа был выбран пользователем
+ * @param {array} levelAnswers - варианты ответов, которые были доспупны на текущем уровне
+ * @return {array} - массив ответов, которые были выбраны пользователем
+ */
+export function getSelectedAnswers(selectedAnswers, levelAnswers) {
+  return levelAnswers.filter((_, index) => selectedAnswers[index]);
 }

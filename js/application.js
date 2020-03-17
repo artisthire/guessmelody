@@ -14,8 +14,7 @@ export default class Application {
     showScreen(level.element);
   }
 
-  static showGameStatistics() {
-    console.log('Game End');
+  static showStatistics() {
   }
 
 }

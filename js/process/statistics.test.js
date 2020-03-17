@@ -4,7 +4,7 @@
 import {assert} from 'chai';
 
 import {calcUserResult, getGameEndMessage, updateRatings, getUserRating} from './statistics.js';
-import {initConfig, statisticConfig} from './config.js';
+import {initConfig, statisticConfig} from '../data/config.js';
 
 
 describe('calcUserResult - проверка функции подсчета статистики', function () {

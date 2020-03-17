@@ -1,56 +1,48 @@
 import {assert} from 'chai';
-import sinon from '../../node_modules/sinon/pkg/sinon-esm.js';
 
-import {initConfig, statisticConfig} from '../data/config.js';
-import {gameState} from '../data/data.js';
-import {removeGameLife, levelSpeed} from './process.js';
+import {GAME_PARAM} from '../data/config.js';
+import {isFastAnswer, hasWrongAnswer, getSelectedAnswers} from './process.js';
 
-describe('Тестирование функции управления жизнями', function () {
-  beforeEach(function () {
-    gameState.wrongAnswer = 0;
-  });
 
-  it(`Должно быть 1 когда допущена 1 ошибка`, function () {
-    removeGameLife();
-    assert.equal(gameState.wrongAnswer, 1);
-  });
-
-  it(`Должно быть 3 когда использована последняя жизнь`, function () {
-    for (let i = initConfig.totalTries; i > 0; i--) {
-      removeGameLife();
-    }
-    assert.equal(gameState.wrongAnswer, 3);
-  });
-
-  it(`Должно быть -1 когда превышено колличество попыток`, function () {
-    for (let i = (initConfig.totalTries + 1); i > 0; i--) {
-      removeGameLife();
-    }
-    assert.equal(gameState.wrongAnswer, -1);
-  });
-});
-
-describe('Тестирование функции скорости ответа вопросы уровня', function () {
-  const clock = sinon.useFakeTimers();
-
-  after(function () {
-    clock.restore();
-  });
-
-  beforeEach(function () {
-    levelSpeed.setStartTimer();
-  });
+describe('Функция скорости ответа на вопросы уровня', function () {
 
   it('Должно быть FALSE, когда ответ Медленный', function () {
-    clock.tick(statisticConfig.limitTime + 1);
-    assert.isNotTrue(levelSpeed.getAnswerSpeed());
+    assert.isNotTrue(isFastAnswer(GAME_PARAM.limitTime));
   });
 
   it('Должно быть TRUE, когда ответ Быстрый', function () {
-    clock.tick(statisticConfig.limitTime - 1);
-    assert.isTrue(levelSpeed.getAnswerSpeed());
-    clock.tick(1);
-    assert.isTrue(levelSpeed.getAnswerSpeed());
+    assert.isTrue(isFastAnswer(GAME_PARAM.limitTime - 1));
   });
+
 });
 
+describe('Функция проверки наличия неправильных ответов', function () {
+
+  it('Должно быть FALSE, когда все ответы правильные', function () {
+    assert.isNotTrue(hasWrongAnswer([false, false, true, true, false],
+        [{isCorrect: false}, {isCorrect: false}, {isCorrect: true}, {isCorrect: true}, {isCorrect: false}]));
+  });
+
+  it('Должно быть TRUE, когда выбраны не все правильные ответы', function () {
+    assert.isTrue(hasWrongAnswer([false, false, true, true, false],
+        [{isCorrect: false}, {isCorrect: true}, {isCorrect: true}, {isCorrect: true}, {isCorrect: false}]));
+  });
+
+  it('Должно быть TRUE, когда выбран хоть один неправильный ответ', function () {
+    assert.isTrue(hasWrongAnswer([false, true, true, true, false],
+        [{isCorrect: false}, {isCorrect: false}, {isCorrect: true}, {isCorrect: true}, {isCorrect: false}]));
+  });
+
+});
+
+describe('Функция получения выбранных вариантов ответов', function () {
+
+  it('Должна выдавать колличество ответов, соответствующее колличеству выбранных вариантов', function () {
+    assert.lengthOf(getSelectedAnswers([false, false, true, true, false], ['a', 'b', 'c', 'd', 'e']), 2);
+  });
+
+  it('Должна выдавать только те варианты ответов, которые были выбраны пользователем', function () {
+    assert.deepEqual(getSelectedAnswers([true, false, true, true, false], ['a', 'b', 'c', 'd', 'e']), ['a', 'c', 'd']);
+  });
+
+});

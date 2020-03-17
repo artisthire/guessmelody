@@ -2,7 +2,7 @@
  * Модуль содержит функции подсчета статистики результатов игры
  */
 
-import {initConfig, statisticConfig} from './config.js';
+import {initConfig, statisticConfig} from '../data/config.js';
 import {getTimeComponents, wordFrom} from '../utilities.js';
 import {loadGameStatistics, sendGameStatistics} from '../network/server-communication.js';
 

@@ -1,3 +1,7 @@
+/**
+ * Модуль содержит презентек игрового уровня
+ * Связывает игровую модель и отображение игрового уровня
+ */
 import LevelHeaderScreenView from '../views/level-header-screen-view.js';
 import LevelScreenView from '../views/level-screen-view.js';
 
@@ -6,18 +10,20 @@ import Application from '../application.js';
 
 import {GAME_PARAM} from '../data/config.js';
 import {showScreen} from '../utilities.js';
+import {hasWrongAnswer, getSelectedAnswers} from '../process/process.js';
 
 export default class LevelScreen {
 
   constructor() {
     this.model = new GameModel();
-    this.nextLevel = this.nextLevel.bind(this);
-    this.createLevel(this.model);
+    // создать презентер связывающий модель и представление
+    this.createController(this.model);
   }
 
-  createLevel(model) {
+  createController(model) {
     this.viewBody = new LevelScreenView(model.currentLevel);
-    this.viewBody.onAnswerSubmit = this.nextLevel;
+    // при ответе на текущие вопросы, переключаемся на следующий уровень
+    this.viewBody.onAnswerSubmit = () => this.nextLevel();
     this.element = this.viewBody.element;
     this._updateHeader();
 
@@ -33,7 +39,7 @@ export default class LevelScreen {
 
       if (!this.model.hasMoreTime()) {
         this.stopTimer();
-        Application.showGameStatistics();
+        Application.showStatistics(this.model);
         return;
       }
 
@@ -44,30 +50,33 @@ export default class LevelScreen {
   }
 
   stopTimer() {
-    // сохраняем значение времени в конце уровня
-    this._levelEndTime = this.model.state.currentTime;
     // останавливаем таймер
     clearTimeout(this.timeID);
+    // сохраняем значение времени в конце уровня
+    this._levelEndTime = this.model.state.currentTime;
   }
 
   nextLevel() {
     this.stopTimer();
+    // сохранить статистику ответов по уровню
+    const selectedAnswers = getSelectedAnswers(this.viewBody.answersSelected, this.model.currentLevel.answers);
+    this.model.statistics = {answers: selectedAnswers, time: (this._levelStartTime - this._levelEndTime)};
 
+    // если допущены ошибки в ответах, забрать игровую жизнь
+    if (hasWrongAnswer(this.viewBody.answersSelected, this.model.currentLevel.answers)) {
+      this.model.die();
+    }
+    // если игра закончилась успешно либо не успешно
+    // показать экран статистики
     if (this._checkGameEnd()) {
-      Application.showGameStatistics(this.model);
+      Application.showStatistics(this.model);
       return;
     }
-
+    // иначе увеличить номер уровня игры
     this.model.nextLevel();
-
-    this.createLevel(this.model);
-
+    // создать и отобразить экран нового уровня
+    this.createController(this.model);
     showScreen(this.element);
-  }
-
-
-  _checkGameEnd() {
-    return !this.model.hasNexLevel() || this.model.isDie();
   }
 
   _updateHeader() {
@@ -81,5 +90,9 @@ export default class LevelScreen {
 
     this.headerElement = this.viewHeader.element;
     this.element.prepend(this.headerElement);
+  }
+
+  _checkGameEnd() {
+    return !this.model.hasNexLevel() || this.model.isDie() || !this.model.hasMoreTime();
   }
 }

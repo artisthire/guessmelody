@@ -3,18 +3,6 @@
  */
 
 /**
- * На основе текстового HTML-шаблона возвращает массив с элементами DOM
- * @param {string} template - шаблон разметки HTML в виде строки
- * @return {object} - контейнер с элементами из шаблона
- */
-export function getElementFromTemplate(template) {
-  const container = document.createElement('div');
-  container.innerHTML = template;
-
-  return container;
-}
-
-/**
  * Возвращает случайное целое число в заданном диапазоне min-max включая обе границы
  * @param {number} min - нижний предел диапазона в котором генерируется случайное число
  * @param {number} max - верхний предел диапазона в котором генерируется случайное число
@@ -75,15 +63,15 @@ export function getTimeAnimationRadius(timePercent, circleLength) {
   return {stroke, offset};
 }
 
-// контейнер, в котором отображаются все игровые окна
-const screensContainer = document.querySelector('.main');
-
 /**
  * Функция показа представления игрового экрана
  * @param {object} element - DOM-элемент контейнер с разметкой, который нужно отобразить на экране
  * @param {boolean} containerClear - флаг очистки предыдущего содержимого контейнера
  */
 export function showScreen(element, containerClear = true) {
+
+  // контейнер, в котором отображаются все игровые окна
+  const screensContainer = document.querySelector('.main');
 
   if (containerClear) {
     screensContainer.textContent = '';
