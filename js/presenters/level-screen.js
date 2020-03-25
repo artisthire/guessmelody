@@ -4,6 +4,7 @@
  */
 import LevelHeaderScreenView from '../views/level-header-screen-view.js';
 import LevelScreenView from '../views/level-screen-view.js';
+import ModalConfirmView from '../views/modal-confirm-view.js';
 
 import GameModel from '../models/game-model.js';
 import Application from '../application.js';
@@ -86,7 +87,7 @@ export default class LevelScreen {
 
     this.viewHeader = new LevelHeaderScreenView(this.model.state);
     this.viewHeader.updateTime(this.model.state);
-    this.viewHeader.onBackBtnClick = Application.showStart;
+    this.viewHeader.onBackBtnClick = () => this._showModalConfirm();
 
     this.headerElement = this.viewHeader.element;
     this.element.prepend(this.headerElement);
@@ -94,5 +95,12 @@ export default class LevelScreen {
 
   _checkGameEnd() {
     return !this.model.hasNexLevel() || this.model.isDie() || !this.model.hasMoreTime();
+  }
+
+  _showModalConfirm() {
+    this.modalConfirmView = new ModalConfirmView();
+    this.modalConfirmView.onCancel = () => this.modalConfirmView.element.remove();
+    this.modalConfirmView.onConfirm = () => Application.showStart();
+    showScreen(this.modalConfirmView.element, false);
   }
 }
