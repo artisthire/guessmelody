@@ -6,6 +6,10 @@
 import AbstractView from './abstract-view.js';
 import TrackContoller from '../process/tracks-controller.js';
 
+import {DEBUG_MODE} from '../data/config.js';
+
+const DEBUG_STYLE = 'outline: 2px solid red';
+
 // шаблон разметки игрового уровня на выбор Артиста по аудиотреку
 const selectArtistTemplate = (question) => `<section class="game game--artist">
   <section class="game__screen">
@@ -20,7 +24,7 @@ const selectArtistTemplate = (question) => `<section class="game game--artist">
     `<div class="artist">
       <input class="artist__input visually-hidden" type="radio" name="answer" value="${answer.artist}" id="answer-${index + 1}">
       <label class="artist__name" for="answer-${index + 1}">
-        <img class="artist__picture" src="${answer.img}" alt="${answer.artist}">
+        <img class="artist__picture" src="${answer.img}" alt="${answer.artist}" style="${(answer.isCorrect && DEBUG_MODE) ? DEBUG_STYLE : ''}">
         ${answer.artist}
       </label>
     </div>`
@@ -42,7 +46,7 @@ const selectGenreTemplate = (question) => `<section class="game game--artist">
       <div class="track__status">
         <audio src=${answer.src} ${index === 0 ? 'autoplay' : ''}></audio>
       </div>
-      <div class="game__answer">
+      <div class="game__answer" style="${(answer.isCorrect && DEBUG_MODE) ? DEBUG_STYLE : ''}">
         <input class="game__input visually-hidden" type="checkbox" name="answer" value="${answer.artist}" id="answer-${index + 1}">
         <label class="game__check" for="answer-${index + 1}">Отметить</label>
       </div>

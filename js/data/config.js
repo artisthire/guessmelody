@@ -14,6 +14,8 @@ const GAME_PARAM = {
   failRatio: -2 // колличество очков за каждую ошибку
 };
 
+const DEBUG_MODE = window.location.hash.toLowerCase().includes('debug');
+
 // общие данные об игре
 const initConfig = {
   initLevel: 0, // начальный уровень
@@ -30,4 +32,4 @@ const statisticConfig = {
   failRatio: -2 // колличество очков за каждую ошибку
 };
 
-export {GAME_PARAM, initConfig, statisticConfig};
+export {GAME_PARAM, DEBUG_MODE, initConfig, statisticConfig};
