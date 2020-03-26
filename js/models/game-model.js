@@ -1,7 +1,7 @@
 /**
  * Модуль содержит модель для использования на игровых уровнях
  */
-import {INITIAL_STATE, questions} from '../data/data.js';
+import {INITIAL_STATE, GAME_DATA} from '../data/data.js';
 
 export default class GameModel {
 
@@ -22,7 +22,7 @@ export default class GameModel {
    * @return {object} - объект с данными для текущего уровня игры
    */
   get currentLevel() {
-    return questions[this._state.level];
+    return GAME_DATA.questions[this._state.level];
   }
 
   /**
@@ -60,7 +60,7 @@ export default class GameModel {
    * @return {boolean} - true - еще есть следующий уровень, false - достигнут конец игры
    */
   hasNexLevel() {
-    return questions[this._state.level + 1] !== undefined;
+    return GAME_DATA.questions[this._state.level + 1] !== undefined;
   }
 
   /**
