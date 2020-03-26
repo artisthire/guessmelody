@@ -13,6 +13,11 @@ export const INITIAL_STATE = {
   statistics: []
 };
 
+export const GAME_DATA = {
+  questions: [],
+  statistics: []
+}
+
 // структура, хранящая результаты игры пользователя
 export const levelResultTemplate = {
   answers: [],
@@ -31,12 +36,6 @@ export const gameState = {
   gameResults: [] // временное хранилище результатов игор, пока не будет загружаться с сервера
 };
 
-// структура, хранящая результаты игры пользователя
-export const levelResult = {
-  answers: [],
-  time: 0
-};
-
 // структура, хранящая вопросы для всех уровней игры
 const questionTemplate = {
   type: '',
@@ -46,7 +45,7 @@ const questionTemplate = {
 };
 
 // структура для хранения информации по ответам на вопросы
-export const answerTemplate = {
+const answerTemplate = {
   artist: '',
   name: '',
   img: '',
@@ -54,7 +53,10 @@ export const answerTemplate = {
   isCorrect: true
 };
 
-export const questions = getQuestions(
+// хранят значения загруженных вопросов для игры
+// и статистуку результатов предущих игор
+export let statistics = [];
+export let questions = getQuestions(
     ['artist', 'genre', 'genre', 'genre', 'artist', 'artist', 'genre', 'genre', 'artist', 'artist'],
     ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?'],
     [[0], [1], [0, 1], [3, 4], [5], [4], [3, 4], [5, 1], [2], [3]],

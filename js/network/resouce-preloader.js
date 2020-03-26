@@ -10,14 +10,21 @@
  * @param {object} gameData - объект, содержащий информацию о необходимых файла для игры, в т.ч. URL-ссылки на файлы
  * @return {object} - объект вида {audio: [], image: []} содержащий перечень URL-ссылок на файлы музыки и картинок
  */
-function getResourceUrls(gameData) {
-  let urls = {audio: [], image: []};
+function getResourceUrls(questions) {
+  const audioUrls = new Set();
+  const imgUrls = new Set();
 
-  gameData.forEach((data) => {
-    urls.audio.push(data.src);
-    urls.image.push(data.image);
-    return;
+  questions.forEach((question) => {
+    question.srcs.forEach((src) => audioUrls.add(src));
+    question.answers.forEach((answer) => {
+      audioUrls.add(answer.src);
+      imgUrls.add(answer.img);
+    });
   });
+
+  const urls = {audio: [], image: []};
+  urls.audio = Array.from(audioUrls);
+  urls.image = Array.from(imgUrls);
 
   return urls;
 }
