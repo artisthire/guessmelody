@@ -38,7 +38,7 @@ export async function loadQuestions() {
 
 /**
  * Функция получения статистики с результатами игор пользователей с сервера
- * Временно сохраняет статические данные в sessionStorage, без взаимодейстия с сервером
+ * Временно сохраняет статические данные локально, без взаимодейстия с сервером
  * @return {array} - массив статистики результатов игры всех пользователей
  */
 export async function loadStatistics() {
@@ -54,13 +54,11 @@ export async function loadStatistics() {
 
 /**
  * Функция отправки результатов игры на сервер
- * Временно сохраняет результаты в sessionStorage, без взаимодействия с сервером
+ * Временно сохраняет результаты локально, без взаимодействия с сервером
  * @param {array} statistics - массив статистики результатов игры других пользователей и текущего игрока
  */
-export async function sendStatistics(statistics) {
-  // имитация задержки по сети
-  await new Promise((resolve) => setTimeout(() => resolve(), getRandomIntInclusive(15, 100)));
-
+export function sendStatistics(statistics) {
+  // console.log('Statistics sendet');
   GAME_DATA.statistics = statistics;
 }
 

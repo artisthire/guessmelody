@@ -1,5 +1,5 @@
 /**
- * Модуль содержит презентек игрового уровня
+ * Модуль содержит презентер игрового уровня
  * Связывает игровую модель и отображение игрового уровня
  */
 import LevelHeaderScreenView from '../views/level-header-screen-view.js';
@@ -8,6 +8,7 @@ import ModalConfirmView from '../views/modal-confirm-view.js';
 
 import GameModel from '../models/game-model.js';
 import Application from '../application.js';
+import {startNewGame} from '../process/process.js';
 
 import {GAME_PARAM} from '../data/config.js';
 import {showScreen} from '../utilities.js';
@@ -40,6 +41,8 @@ export default class LevelScreen {
 
       if (!this.model.hasMoreTime()) {
         this.stopTimer();
+        // console.log('No more time line');
+        // console.log(this.model.state);
         Application.showStatistics(this.model);
         return;
       }
@@ -70,6 +73,8 @@ export default class LevelScreen {
     // если игра закончилась успешно либо не успешно
     // показать экран статистики
     if (this._checkGameEnd()) {
+      // console.log('All check line');
+      // console.log(this.model.state);
       Application.showStatistics(this.model);
       return;
     }
@@ -100,7 +105,7 @@ export default class LevelScreen {
   _showModalConfirm() {
     this.modalConfirmView = new ModalConfirmView();
     this.modalConfirmView.onCancel = () => this.modalConfirmView.element.remove();
-    this.modalConfirmView.onConfirm = () => Application.showStart();
+    this.modalConfirmView.onConfirm = () => startNewGame();
     showScreen(this.modalConfirmView.element, false);
   }
 }

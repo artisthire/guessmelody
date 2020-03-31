@@ -2,6 +2,8 @@ import {assert} from 'chai';
 
 import {getTimeComponents, getTimeAnimationRadius} from './utilities.js';
 
+const document = (typeof document === 'undefined') ? {} : document;
+
 describe('Тест функции получения компонентов времени', function () {
 
   it(`Должна возвращать массив строкового представления минут и секунд из времени заданного в миллисекундах`, function () {

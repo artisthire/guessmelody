@@ -1,7 +1,6 @@
 /**
  * Модуль содержит функции управления игровы процессом
  */
-import {GAME_PARAM} from '../data/config.js';
 import {GAME_DATA} from '../data/data.js';
 import {loadQuestions, loadStatistics} from '../network/server-communication.js';
 import preloadResource from '../network/resouce-preloader.js';
@@ -10,16 +9,6 @@ import Application from '../application.js';
 import ModalLoadAnimationView from '../views/modal-load-animatin-view.js';
 import ModalErrorView from '../views/modal-error-view.js';
 import {showScreen} from '../utilities.js';
-
-/**
- * Проверяет был ли ответ на вопросы уровня быстрым или медленным
- * Скорость ответа сравнивается с заданным параметров в игре
- * @param {number} levelTime - скорость ответа на вопрос на текущем уровен игры
- * @return {boolean} - true - ответ дан быстро, false - медленно
- */
-export function isFastAnswer(levelTime) {
-  return levelTime < GAME_PARAM.limitTime;
-}
 
 /**
  * Сравнивает выбранные пользователем ответы с доступными вариантами ответов на текущем уровне игры
@@ -46,18 +35,26 @@ export function getSelectedAnswers(selectedAnswers, levelAnswers) {
   return levelAnswers.filter((_, index) => selectedAnswers[index]);
 }
 
-export function restartGame() {
+/**
+ * Функция старта новой игры
+ * Скачивает и предзагружает ресурсы для игры
+ * В случае успешной загрузки с сервера - показывает стартовое окно
+ * В случае ошибок взаимодействия по сети - окно ошибки
+ */
+export function startNewGame() {
+  // представление модального окна анимации загрузки ресурсов
   const loadAnimationElement = new ModalLoadAnimationView().element;
-
   showScreen(loadAnimationElement, false);
 
   // предзагрузка ресуров для игры:
+  // 1. Загрузка вопросов и статистики предыдущих игор
   Promise.all([loadQuestions(), loadStatistics()])
   .then((gameData) => {
     GAME_DATA.questions = gameData[0];
     GAME_DATA.statistics = gameData[1];
     return gameData[0];
   })
+  // 2. Презагрузка аудиофайлов и картинок
   .then((questions) => preloadResource(questions))
   // в любом случае убираем анимацию процесса загрузки
   .finally(() => loadAnimationElement.remove())

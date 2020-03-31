@@ -1,20 +1,7 @@
 import {assert} from 'chai';
 
-import {GAME_PARAM} from '../data/config.js';
-import {isFastAnswer, hasWrongAnswer, getSelectedAnswers} from './process.js';
+import {hasWrongAnswer, getSelectedAnswers} from './process.js';
 
-
-describe('Функция скорости ответа на вопросы уровня', function () {
-
-  it('Должно быть FALSE, когда ответ Медленный', function () {
-    assert.isNotTrue(isFastAnswer(GAME_PARAM.limitTime));
-  });
-
-  it('Должно быть TRUE, когда ответ Быстрый', function () {
-    assert.isTrue(isFastAnswer(GAME_PARAM.limitTime - 1));
-  });
-
-});
 
 describe('Функция проверки наличия неправильных ответов', function () {
 
