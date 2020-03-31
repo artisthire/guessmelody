@@ -30,9 +30,7 @@ export async function loadQuestions() {
 
   const gameQuestions = getQuestions(
       ['artist', 'genre', 'genre', 'genre', 'artist', 'artist', 'genre', 'genre', 'artist', 'artist'],
-      ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?'],
-      [[0], [1], [0, 1], [3, 4], [5], [4], [3, 4], [5, 1], [2], [3]],
-      [[0, 1, 2], [1, 0, 2, 3], [0, 1, 2, 3], [3, 4, 2, 5], [5, 1, 2], [4, 1, 3], [4, 3, 2, 5], [1, 5, 2, 3], [2, 1, 3], [3, 1, 4]]
+      ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?']
   );
 
   return gameQuestions;
@@ -70,13 +68,9 @@ export async function sendStatistics(statistics) {
  * Временная функция для генерации вопросов для игры на основе статической информации
  * @param {array} types - массив строк указывающих на тип каждого вопроса ('artist' - угадай исполнителя, 'genre' - жанр)
  * @param {array} titles - массив содержащий строки с тексотом вопроса
- * @param {array} srcs - массив с массивами номеров индексов со ссылками на SRC музыкальных файлов.
- *  Используется как массив содержащий индексы правильных ответов на вопросы. А также для типа игры 'artist' как источник для аудиофайла в вопросе.
- * @param {array} answerIndexes - массив с массивами номеров индексов указывающих на номер информации по аудиофайлу в статических данных
- *  Используется при генерации информации по вариантам ответов. Также сопоставляется с массивом в srcs для поиска правильных ответов.
  * @return {array} - массив объектов с вопросами и вариантами ответов для каждого уровня игры
  */
-function getQuestions(types, titles, srcs, answerIndexes) {
+function getQuestions(types, titles) {
   // структура, хранящая вопросы для всех уровней игры
   const questionTemplate = {
     type: '',
@@ -94,6 +88,7 @@ function getQuestions(types, titles, srcs, answerIndexes) {
     isCorrect: true
   };
 
+  // здесь будет сгенерированный массив вопросов и ответов к игре
   const gameQuestions = [];
 
   types.forEach((type, index) => {
@@ -102,34 +97,66 @@ function getQuestions(types, titles, srcs, answerIndexes) {
     question.type = type;
     question.title = titles[index];
 
-    const currentSrcs = srcs[index];
-    const currentAnswers = answerIndexes[index];
+    // генерируем массивы случайных числе для вопросов и вариантов ответов
+    // в массивы попадут только индексы ограничивающиеся длинной статического массива данных {staticData}
+    const questionIndexes = new Set();
+    const answerIndexes = new Set();
+
+    if (type === 'artist') {
+      // для типа игры на выбо артиста
+      // 3 варианта ответов
+      while (answerIndexes.size < 3) {
+        answerIndexes.add(getRandomIntInclusive(0, staticData.length - 1));
+      }
+
+      // 1 вопрос
+      questionIndexes.add(Array.from(answerIndexes)[getRandomIntInclusive(0, answerIndexes.size - 1)]);
+
+    } else if (type === 'genre') {
+      // для типа игры на выбо жанра
+      // 4 варианта ответов
+      while (answerIndexes.size < 4) {
+        answerIndexes.add(getRandomIntInclusive(0, staticData.length - 1));
+      }
+
+      // 1 вопрос, но генерируется масси индексов от 1 до 2 вариантов
+      // поскольку корректность вариантов в этой функции устанавливается
+      // путем сравнения ссылки на аудиофайл в вопросах и вариантах ответов
+      const questionVariants = getRandomIntInclusive(1, 2);
+
+      while (questionIndexes.size < questionVariants) {
+        questionIndexes.add(Array.from(answerIndexes)[getRandomIntInclusive(0, answerIndexes.size - 1)]);
+      }
+    }
+
     // временный массив в который будут копироваться результаты вложенных объектов для src и answer
     // т.к. Object.assign создаст поверхностную копию, а внутренние объекты будут ссылками
     // и без этого объекта во все внутренние объекты question для каждого уровня запишутся одни и те же ответы и src
     let tempArr = [];
-
-    currentSrcs.forEach((currentSrc) => {
+    // заполняем массив вопросам ссылками на аудиофайлы
+    questionIndexes.forEach((currentSrc) => {
       tempArr.push(staticData[currentSrc].src);
     });
 
     question.srcs = Object.assign([], tempArr);
     tempArr = [];
 
-    currentAnswers.forEach((currentAnswer) => {
+    // заполняем массив ответов
+    answerIndexes.forEach((currentAnswer) => {
       const answer = Object.assign({}, answerTemplate);
 
       answer.artist = staticData[currentAnswer].artist;
       answer.name = staticData[currentAnswer].name;
       answer.img = staticData[currentAnswer].image;
       answer.src = staticData[currentAnswer].src;
-      answer.isCorrect = currentSrcs.includes(currentAnswer);
+      answer.isCorrect = questionIndexes.has(currentAnswer);
 
       tempArr.push(answer);
     });
 
     question.answers = tempArr;
 
+    // сохраняем данные по вопросам/ответам по каждому уровню в общий массив
     gameQuestions.push(question);
   });
 
