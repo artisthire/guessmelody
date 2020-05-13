@@ -79,13 +79,6 @@ export default class LevelScreenView extends AbstractView {
   }
 
   /**
-   * Обработчик выбора ответа и переходна на следующий уровень
-   * Должен быть переопределен для правильной реакции на переход на следующий уровень
-   */
-  onAnswerSubmit() {
-  }
-
-  /**
    * Переопределение абстрактного метода родителя
    * Возвращает строку с шаблоном разметки окна игрового уровня
    * В зависимости от типа вопросов на уровне (на выбор Артиста или Жанра)
@@ -93,6 +86,13 @@ export default class LevelScreenView extends AbstractView {
   get _template() {
     // по типу полученных вопросов выбрать соответствующий шаблон разметки
     return (this.levelQuestion.type === 'artist') ? selectArtistTemplate(this.levelQuestion) : selectGenreTemplate(this.levelQuestion);
+  }
+
+  /**
+   * Обработчик выбора ответа и переходна на следующий уровень
+   * Должен быть переопределен для правильной реакции на переход на следующий уровень
+   */
+  onAnswerSubmit() {
   }
 
   /**

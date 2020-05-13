@@ -19,24 +19,11 @@ export default class LevelScreen {
   constructor() {
     this.model = new GameModel();
     // создать презентер связывающий модель и представление
-    this.createController(this.model);
-  }
-
-  createController(model) {
-    this.viewBody = new LevelScreenView(model.currentLevel);
-    // при ответе на текущие вопросы, переключаемся на следующий уровень
-    this.viewBody.onAnswerSubmit = () => this.nextLevel();
-    this.element = this.viewBody.element;
-    this._updateHeader();
-
-    // сохраняем значение времени в начале уровня
-    this._levelStartTime = model.state.currentTime;
-    // запустить отсчет времени
-    this.tick();
+    this._createController(this.model);
   }
 
   tick() {
-    this.timeID = setTimeout(() => {
+    this.timerID = setTimeout(() => {
       this.model.tick();
 
       if (!this.model.hasMoreTime()) {
@@ -55,7 +42,7 @@ export default class LevelScreen {
 
   stopTimer() {
     // останавливаем таймер
-    clearTimeout(this.timeID);
+    clearTimeout(this.timerID);
     // сохраняем значение времени в конце уровня
     this._levelEndTime = this.model.state.currentTime;
   }
@@ -81,8 +68,21 @@ export default class LevelScreen {
     // иначе увеличить номер уровня игры
     this.model.nextLevel();
     // создать и отобразить экран нового уровня
-    this.createController(this.model);
+    this._createController(this.model);
     showScreen(this.element);
+  }
+
+  _createController(model) {
+    this.viewBody = new LevelScreenView(model.currentLevel);
+    // при ответе на текущие вопросы, переключаемся на следующий уровень
+    this.viewBody.onAnswerSubmit = () => this.nextLevel();
+    this.element = this.viewBody.element;
+    this._updateHeader();
+
+    // сохраняем значение времени в начале уровня
+    this._levelStartTime = model.state.currentTime;
+    // запустить отсчет времени
+    this.tick();
   }
 
   _updateHeader() {

@@ -74,8 +74,6 @@ function getImageFile(url) {
 /**
  * Общая функция, которая отвечает за предзагрузку ресурсов для игры
  * @param {object} gameData - объект с данными о ресурсах, которые нужно загрузить. Содержит в т.ч. ссылки URL на файлы.
- * @param {function} success - callback-функция, которая вызывается при успешной загруке всех файлов
- * @param {function} error - callback-функция, которая вызывается если хоть один файл загружен не был
  * @return {array} - массив результатов предзагрузки
  */
 export default async function preloadResource(gameData) {

@@ -14,22 +14,6 @@ const GAME_PARAM = {
   failRatio: -2 // колличество очков за каждую ошибку
 };
 
-const DEBUG_MODE = window.location.hash.toLowerCase().includes('debug');
+const DEBUG_MODE = true || window.location.hash.toLowerCase().includes('debug');
 
-// общие данные об игре
-const initConfig = {
-  initLevel: 0, // начальный уровень
-  totalTries: 3, // колличество жизней
-  totalTime: 5 * 60 * 1000, // общее время в течении которого нужно ответить на все вопросы (5 минут в миллисекундах)
-  gameEndCode: {'run': 0, 'complete': 1, 'failTries': 2, 'failTime': 3} // коды завершения игры
-};
-
-// данные для подсчета результатов игры пользователя
-const statisticConfig = {
-  limitTime: 30 * 1000, // время, до достижения которого ответ считается быстрым
-  quickRatio: 2, // колличество очков за каждый быстрый ответ
-  correctRatio: 1, // колличество очков за каждый правильный ответ
-  failRatio: -2 // колличество очков за каждую ошибку
-};
-
-export {GAME_PARAM, DEBUG_MODE, initConfig, statisticConfig};
+export {GAME_PARAM, DEBUG_MODE};
