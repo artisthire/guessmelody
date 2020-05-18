@@ -13,6 +13,7 @@ export const INITIAL_STATE = {
 };
 
 export const GAME_DATA = {
+  appId: '',
   questions: [],
   statistics: []
 };

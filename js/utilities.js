@@ -15,6 +15,16 @@ export function getRandomIntInclusive(min = 0, max) {
 }
 
 /**
+ * Возвращает идентификатор текущей сессии игры
+ * @return {string} - строка идентификатора текущей сессии игры
+ */
+export function createAppId() {
+  const browser = window.navigator.userAgent.split(' ').splice(-2, 1);
+
+  return `${browser}_${Date.now()}`;
+}
+
+/**
  * Возвращает колличество минут и секунд из времени, представленном в миллисекундах
  * Значения из одного символа дополняются до двузначного представления нулем в начале
  * @param {number} time - колличество миллисекунд

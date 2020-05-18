@@ -1,6 +1,6 @@
 import StartScreen from './presenters/start-screen.js';
 import LevelScreen from './presenters/level-screen.js';
-import ResultScreen from './presenters/result-screen.js';
+import createResultScreen from './presenters/result-screen.js';
 import {showScreen} from './utilities.js';
 
 export default class Application {
@@ -16,8 +16,6 @@ export default class Application {
   }
 
   static showStatistics(model) {
-    const result = new ResultScreen(model);
-    showScreen(result.element);
+    createResultScreen(model).then((screenView) => showScreen(screenView.element));
   }
-
 }

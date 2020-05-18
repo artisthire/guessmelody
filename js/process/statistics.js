@@ -57,14 +57,14 @@ export function getResultMessage(endFlags, state, results, userResult) {
  *  Каждый объект внутри массива содержит результат ответов пользователя на вопрос каждого уровня:
  *  [{[] - массив выбранных пользователем ответов, time: {number} - милисекунды затраченные на ответ)}]
  * @param {number} wrongAnswer - количество неправильных ответов
- * @param {number} questionsCount - общее колличество вопросов
+ * @param {number} totalQuestion - общее колличество вопросов
  * @return {object} - объект вида {quickAnswer, ball} с колличеством быстрых ответов и набраных баллов
  */
-export function calcUserResult(answers, wrongAnswer, questionsCount) {
+export function calcUserResult(answers, wrongAnswer, totalQuestion) {
   // колличество быстрых ответов
   const quickAnswer = answers.reduce((sum, answer) => sum + (isFastAnswer(answer.time) ? 1 : 0), 0);
 
-  const ball = quickAnswer * GAME_PARAM.quickRatio + (questionsCount - quickAnswer) * GAME_PARAM.correctRatio + wrongAnswer * GAME_PARAM.failRatio;
+  const ball = quickAnswer * GAME_PARAM.quickRatio + (totalQuestion - quickAnswer) * GAME_PARAM.correctRatio + wrongAnswer * GAME_PARAM.failRatio;
 
   return {quickAnswer, ball};
 }

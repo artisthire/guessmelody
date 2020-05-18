@@ -5,22 +5,37 @@ import staticData from '../data/game-static-data.js';
 import {GAME_DATA} from '../data/data.js';
 import {getRandomIntInclusive} from '../utilities.js';
 
+// ссылки на URL-адрес взаимодействия с сервером
+// тестовые, должны быть заменены на реальные адреса
+const URL = {
+  questions: 'http://httpbin.org/get?foo1=bar1&foo2=bar2',
+  getStatistics: 'http://httpbin.org/get',
+  setStatistics: 'http://httpbin.org/post'
+};
+
 /**
  * Функция получения данных по вопросам с сервера
  * Временно генерирует объект с вопросами для уровней игры на основе статических данных
  * @return {object} - объект с данными о вопросах
  */
 export async function loadQuestions() {
-  // временно возвращаем статические данные для игры
-  // нужно заменить на реальное взаимодействие с сервером
-  // имитация задержки по сети
-  await new Promise((resolve) => setTimeout(() => resolve(), getRandomIntInclusive(15, 100)));
-
+  // временно генерируем статические данные
   const gameQuestions = getQuestions(
       ['artist', 'genre', 'genre', 'genre', 'artist', 'artist', 'genre', 'genre', 'artist', 'artist'],
       ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?']
   );
 
+  const response = await fetch(URL.questions, {
+    method: 'GET',
+    redirect: 'follow'
+  });
+
+  checkServerResp(response);
+
+  await response.json();
+
+  // временно возвращаем статические данные для игры
+  // нужно заменить на реальное взаимодействие с сервером
   return gameQuestions;
 }
 
@@ -30,9 +45,21 @@ export async function loadQuestions() {
  * @return {array} - массив статистики результатов игры всех пользователей
  */
 export async function loadStatistics() {
-  // имитация задержки по сети
-  await new Promise((resolve) => setTimeout(() => resolve(), getRandomIntInclusive(15, 100)));
+  // запрос на URL с уникальным номером сессии текущей игры
+  const url = `${URL.getStatistics}?appId=${GAME_DATA.appId}`;
 
+  // запрос статистики
+  const response = await fetch(url, {
+    method: 'GET',
+    redirect: 'follow'
+  });
+
+  // проверка статуса ответа
+  checkServerResp(response);
+  await response.json();
+
+  // временно мокаем локальное хранилище статическими данными
+  // пока не будет правильного URL на сервер хранения статистики
   if (!GAME_DATA.statistics.length) {
     GAME_DATA.statistics = [11, 10, 9];
   }
@@ -45,9 +72,35 @@ export async function loadStatistics() {
  * Временно сохраняет результаты локально, без взаимодействия с сервером
  * @param {array} statistics - массив статистики результатов игры других пользователей и текущего игрока
  */
-export function sendStatistics(statistics) {
-  // console.log('Statistics sendet');
+export async function sendStatistics(statistics) {
+  // запрос на URL с уникальным номером сессии текущей игры
+  const url = `${URL.setStatistics}?appId=${GAME_DATA.appId}`;
+  const body = {answers: statistics};
+
+  // запрос статистики
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8'
+    },
+    body: JSON.stringify(body)
+  });
+
+  // проверка статуса ответа
+  checkServerResp(response);
+  // временно сохраняем статические данные локально
   GAME_DATA.statistics = statistics;
+}
+
+/**
+ * Функция проверки статуса ответа сервера
+ * @param {object} response - объект со статусом ответа
+ */
+async function checkServerResp(response) {
+  if (!response.ok) { // если HTTP-статус НЕ в диапазоне 200-299
+    // получаем тело ответа
+    throw new Error();
+  }
 }
 
 /**

@@ -2,13 +2,13 @@
  * Модуль содержит функции управления игровы процессом
  */
 import {GAME_DATA} from '../data/data.js';
-import {loadQuestions, loadStatistics} from '../network/server-communication.js';
+import {loadQuestions} from '../network/server-communication.js';
 import preloadResource from '../network/resouce-preloader.js';
 
 import Application from '../application.js';
 import ModalLoadAnimationView from '../views/modal-load-animatin-view.js';
 import ModalErrorView from '../views/modal-error-view.js';
-import {showScreen} from '../utilities.js';
+import {showScreen, createAppId} from '../utilities.js';
 
 /**
  * Сравнивает выбранные пользователем ответы с доступными вариантами ответов на текущем уровне игры
@@ -47,14 +47,14 @@ export function startNewGame() {
   showScreen(loadAnimationElement, false);
 
   // предзагрузка ресуров для игры:
-  // 1. Загрузка вопросов и статистики предыдущих игор
-  Promise.all([loadQuestions(), loadStatistics()])
-  .then((gameData) => {
-    GAME_DATA.questions = gameData[0];
-    GAME_DATA.statistics = gameData[1];
-    return gameData[0];
+  // 1. Загрузка вопросов
+  loadQuestions()
+  .then((questions) => {
+    GAME_DATA.questions = questions;
+    GAME_DATA.appId = createAppId();
+    return questions;
   })
-  // 2. Презагрузка аудиофайлов и картинок
+  // 2. Предзагрузка аудиофайлов и картинок
   .then((questions) => preloadResource(questions))
   // в любом случае убираем анимацию процесса загрузки
   .finally(() => loadAnimationElement.remove())
