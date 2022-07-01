@@ -7,7 +7,7 @@ import AbstractView from './abstract-view.js';
 
 // Общий шаблон разметки окна с результатом игры
 const resultScreenTemplate = (message) => `<section class="result">
-    <div class="result__logo"><img src="img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
+    <div class="result__logo"><img src="./img/melody-logo.png" alt="Угадай мелодию" width="186" height="83"></div>
     ${message}
     <button class="result__replay" type="button">Попробовать ещё раз</button>
   </section>`;

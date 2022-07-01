@@ -16,7 +16,7 @@ const headerTemplate = (state) => {
   return `<header class="game__header">
       <a class="game__back" href="#">
         <span class="visually-hidden">Сыграть ещё раз</span>
-        <img class="game__logo" src="/img/melody-logo-ginger.png" alt="Угадай мелодию">
+        <img class="game__logo" src="./img/melody-logo-ginger.png" alt="Угадай мелодию">
       </a>
 
       <svg xmlns="http://www.w3.org/2000/svg" class="timer" viewBox="0 0 780 780">
