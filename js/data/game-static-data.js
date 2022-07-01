@@ -23,7 +23,7 @@ export default [
   {
     artist: `Audionautix`,
     name: `Travel Light`,
-    image: `http://4.bp.blogspot.com/-kft9qu5ET6U/VPFUBi9W-MI/AAAAAAAACYM/UxXilXKYwOc/s1600/audionautix%2BHalf%2BSize.jpg`,
+    image: `https://4.bp.blogspot.com/-kft9qu5ET6U/VPFUBi9W-MI/AAAAAAAACYM/UxXilXKYwOc/s1600/audionautix%2BHalf%2BSize.jpg`,
     src: `https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Jason_Shaw/Audionautix_Acoustic/Jason_Shaw_-_TRAVEL_LIGHT.mp3`,
     genre: `Country`
   },
