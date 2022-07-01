@@ -8,9 +8,9 @@ import {getRandomIntInclusive} from '../utilities.js';
 // ссылки на URL-адрес взаимодействия с сервером
 // тестовые, должны быть заменены на реальные адреса
 const SERVER_URLS = {
-  questions: 'http://httpbin.org/get?foo1=bar1&foo2=bar2',
-  getStatistics: 'http://httpbin.org/get',
-  setStatistics: 'http://httpbin.org/post'
+  questions: 'https://dummyjson.com/products',
+  getStatistics: 'https://dummyjson.com/products/1',
+  setStatistics: 'https://dummyjson.com/products/add'
 };
 
 /**
