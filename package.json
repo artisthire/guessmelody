@@ -3,6 +3,7 @@
   "version": "5.0.0",
   "private": true,
   "description": "Личный проект от HTML Academy",
+  "homepage": "https://artisthire.github.io/guessmelody/",
   "scripts": {
     "editorconfig": "editorconfig-cli",
     "stylelint": "stylelint 'sass/**/*.scss' --syntax scss",
