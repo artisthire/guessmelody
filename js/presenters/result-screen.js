@@ -76,7 +76,7 @@ class ResultScreen {
 
   _updateRatings(loadenStatistics) {
     // вычисляем результат текущей игры
-    let {statistics, wrong} = this.model.state;
+    const {statistics, wrong} = this.model.state;
     this._userResult = calcUserResult(statistics, wrong, statistics.length);
     // обновляем статистику игор на основе текущей игры и загруженных данных предыдущих игор
     return updateRatings(loadenStatistics, this._userResult.ball);

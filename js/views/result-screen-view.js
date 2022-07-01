@@ -24,6 +24,7 @@ export default class ResultScreenView extends AbstractView {
    * Обработчик клика на кнопку перезапуска игры
    * Пустой, должен быть определен для обработки события перезапуска игры
    */
+  // eslint-disable-next-line no-empty-function
   onRestartGame() {
   }
 

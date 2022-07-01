@@ -71,15 +71,18 @@ describe('calcUserResult - проверка функции подсчета ст
 describe('getResultMessage - Проверка функции вывода результата игры', function () {
 
   it('Должен быть проигрыш, когда закончились попытки', function () {
+    // eslint-disable-next-line require-unicode-regexp
     assert.match(getResultMessage({isDie: true}), /попытки/);
   });
 
   it('Должен быть проигрыш, когда законилось время', function () {
+    // eslint-disable-next-line require-unicode-regexp
     assert.match(getResultMessage({overTime: true}), /Время/);
   });
 
   it('Должен быть выигрыш, когда получены все ответы, не закончились попытки и время', function () {
     const message = getResultMessage({isDie: false, overTime: false}, {wrong: 1, totalTime: 3 * 60 + 25, currentTime: 0}, [10, 9, 8], {ball: 9, quickAnswer: 1});
+    // eslint-disable-next-line require-unicode-regexp
     assert.match(message, /меломан/);
   });
 });

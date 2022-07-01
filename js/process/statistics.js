@@ -53,7 +53,8 @@ export function getResultMessage(endFlags, state, results, userResult) {
 
 /**
  * Функция подсчета набранных игроком баллов и колличества быстрых ответов
- * @param {array} answers - массив ответов и затраченного времени на каждый вопрос. Упорядочен последовательно по порядку уровней игры
+ * @param {array} answers - массив ответов и затраченного времени на каждый вопрос.
+ *  Упорядочен последовательно по порядку уровней игры
  *  Каждый объект внутри массива содержит результат ответов пользователя на вопрос каждого уровня:
  *  [{[] - массив выбранных пользователем ответов, time: {number} - милисекунды затраченные на ответ)}]
  * @param {number} wrongAnswer - количество неправильных ответов
@@ -62,11 +63,14 @@ export function getResultMessage(endFlags, state, results, userResult) {
  */
 export function calcUserResult(answers, wrongAnswer, totalQuestion) {
   // колличество быстрых ответов
-  const quickAnswer = answers.reduce((sum, answer) => sum + (isFastAnswer(answer.time) ? 1 : 0), 0);
+  const quickAnswer = answers.reduce((sum, answer) => sum + +isFastAnswer(answer.time), 0);
 
-  const ball = quickAnswer * GAME_PARAM.quickRatio + (totalQuestion - quickAnswer) * GAME_PARAM.correctRatio + wrongAnswer * GAME_PARAM.failRatio;
+  const ballQuickAnswer = quickAnswer * GAME_PARAM.quickRatio;
+  const ballCorrectAnswer = (totalQuestion - quickAnswer) * GAME_PARAM.correctRatio;
+  const ballWrongAnswer = wrongAnswer * GAME_PARAM.failRatio;
+  const totalBall = ballQuickAnswer + ballCorrectAnswer + ballWrongAnswer;
 
-  return {quickAnswer, ball};
+  return {quickAnswer, ball: totalBall};
 }
 
 /**
@@ -85,7 +89,8 @@ export function updateRatings(results, userResult) {
   // иначе добавляем результат пользователя в общий рейтинг
   const newRatings = [...results];
   // находим позицию в которую нужно вставить новый результат
-  const indexInRating = (newRatings[newRatings.length - 1] < userResult) ? newRatings.findIndex((element) => element < userResult) : newRatings.length;
+  const indexInRating = (newRatings[newRatings.length - 1] < userResult) ?
+    newRatings.findIndex((element) => element < userResult) : newRatings.length;
   // вставляем результат текущего пользователя в общий массив результатов
   newRatings.splice(indexInRating, 0, userResult);
 
@@ -100,7 +105,7 @@ export function updateRatings(results, userResult) {
  * @return {object} - объект с рейтинговыми показателями игры текущего пользователя:
  *  positionInRating - позиция результата игры текущего пользователя относительно результатов других пользователей
  *  totalUsers - общее колличество пользователей, попавших в рейтиги
- *  percentRating - то же что и positionInRating, но выраженное в процентах относительно результатов других пользователей
+ *  percentRating - то же что и positionInRating, но выраженное в процентах
  */
 export function getResultPosition(results, userResult) {
 

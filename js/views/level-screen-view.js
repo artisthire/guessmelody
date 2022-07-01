@@ -92,6 +92,7 @@ export default class LevelScreenView extends AbstractView {
    * Обработчик выбора ответа и переходна на следующий уровень
    * Должен быть переопределен для правильной реакции на переход на следующий уровень
    */
+  // eslint-disable-next-line no-empty-function
   onAnswerSubmit() {
   }
 

@@ -1,0 +1,14 @@
+parserOptions:
+  ecmaVersion: 2017
+  sourceType: 'module'
+
+env:
+  es6: true
+  browser: true
+  commonjs: true
+  mocha: true
+
+extends: 'htmlacademy/es6'
+
+rules:
+  quotes: ["error", "single", { "allowTemplateLiterals": true }]

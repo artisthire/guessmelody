@@ -8,11 +8,10 @@ import ModalConfirmView from '../views/modal-confirm-view.js';
 
 import GameModel from '../models/game-model.js';
 import Application from '../application.js';
-import {startNewGame} from '../process/process.js';
 
 import {GAME_PARAM} from '../data/config.js';
 import {showScreen} from '../utilities.js';
-import {hasWrongAnswer, getSelectedAnswers} from '../process/process.js';
+import {startNewGame, hasWrongAnswer, getSelectedAnswers} from '../process/process.js';
 
 export default class LevelScreen {
 

@@ -14,6 +14,7 @@ export default class ModalLoadAnimationView extends AbstractView {
     super();
     this.message = message;
   }
+
   /**
    * Переопределение абстрактного метода родителя
    * Возвращает строку с шаблоном разметки модального окна ошибки

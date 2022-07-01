@@ -7,7 +7,7 @@ import {getRandomIntInclusive} from '../utilities.js';
 
 // ссылки на URL-адрес взаимодействия с сервером
 // тестовые, должны быть заменены на реальные адреса
-const URL = {
+const SERVER_URLS = {
   questions: 'http://httpbin.org/get?foo1=bar1&foo2=bar2',
   getStatistics: 'http://httpbin.org/get',
   setStatistics: 'http://httpbin.org/post'
@@ -22,10 +22,12 @@ export async function loadQuestions() {
   // временно генерируем статические данные
   const gameQuestions = getQuestions(
       ['artist', 'genre', 'genre', 'genre', 'artist', 'artist', 'genre', 'genre', 'artist', 'artist'],
-      ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки', 'Кто исполняет эту песню?', 'Кто исполняет эту песню?']
+      ['Кто исполняет эту песню?', 'Выберите рок треки', 'Выберите джаз треки', 'Выберите РНБ треки',
+        'Кто исполняет эту песню?', 'Кто исполняет эту песню?', 'Выберите поп треки', 'Выберите электроник треки',
+        'Кто исполняет эту песню?', 'Кто исполняет эту песню?']
   );
 
-  const response = await fetch(URL.questions, {
+  const response = await fetch(SERVER_URLS.questions, {
     method: 'GET',
     redirect: 'follow'
   });
@@ -45,8 +47,14 @@ export async function loadQuestions() {
  * @return {array} - массив статистики результатов игры всех пользователей
  */
 export async function loadStatistics() {
+  // временно мокаем локальное хранилище статическими данными
+  // пока не будет правильного URL на сервер хранения статистики
+  if (!GAME_DATA.statistics.length) {
+    GAME_DATA.statistics = [11, 10, 9];
+  }
+
   // запрос на URL с уникальным номером сессии текущей игры
-  const url = `${URL.getStatistics}?appId=${GAME_DATA.appId}`;
+  const url = `${SERVER_URLS.getStatistics}?appId=${GAME_DATA.appId}`;
 
   // запрос статистики
   const response = await fetch(url, {
@@ -58,12 +66,6 @@ export async function loadStatistics() {
   checkServerResp(response);
   await response.json();
 
-  // временно мокаем локальное хранилище статическими данными
-  // пока не будет правильного URL на сервер хранения статистики
-  if (!GAME_DATA.statistics.length) {
-    GAME_DATA.statistics = [11, 10, 9];
-  }
-
   return GAME_DATA.statistics;
 }
 
@@ -73,8 +75,11 @@ export async function loadStatistics() {
  * @param {array} statistics - массив статистики результатов игры других пользователей и текущего игрока
  */
 export async function sendStatistics(statistics) {
+  // временно сохраняем статические данные локально
+  GAME_DATA.statistics = statistics;
+
   // запрос на URL с уникальным номером сессии текущей игры
-  const url = `${URL.setStatistics}?appId=${GAME_DATA.appId}`;
+  const url = `${SERVER_URLS.setStatistics}?appId=${GAME_DATA.appId}`;
   const body = {answers: statistics};
 
   // запрос статистики
@@ -88,15 +93,13 @@ export async function sendStatistics(statistics) {
 
   // проверка статуса ответа
   checkServerResp(response);
-  // временно сохраняем статические данные локально
-  GAME_DATA.statistics = statistics;
 }
 
 /**
  * Функция проверки статуса ответа сервера
  * @param {object} response - объект со статусом ответа
  */
-async function checkServerResp(response) {
+function checkServerResp(response) {
   if (!response.ok) { // если HTTP-статус НЕ в диапазоне 200-299
     // получаем тело ответа
     throw new Error();
@@ -105,7 +108,7 @@ async function checkServerResp(response) {
 
 /**
  * Временная функция для генерации вопросов для игры на основе статической информации
- * @param {array} types - массив строк указывающих на тип каждого вопроса ('artist' - угадай исполнителя, 'genre' - жанр)
+ * @param {array} types - массив типов каждого вопроса ('artist' - угадай исполнителя, 'genre' - жанр)
  * @param {array} titles - массив содержащий строки с тексотом вопроса
  * @return {array} - массив объектов с вопросами и вариантами ответов для каждого уровня игры
  */

@@ -47,6 +47,7 @@ export default class LevelHeaderScreenView extends AbstractView {
    * Обработчик клика на кнопку начала игры заново
    * Должен переопределен для правильной реакции на перезапуск игры
    */
+  // eslint-disable-next-line no-empty-function
   onBackBtnClick() {
   }
 

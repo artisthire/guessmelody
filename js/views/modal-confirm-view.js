@@ -23,6 +23,7 @@ export default class ModalConfirmView extends AbstractView {
    * Обработчик клика на кнопку подтверждения выбора
    * Пустой, должен быть определен для обработки события подтверждения выбора
    */
+  // eslint-disable-next-line no-empty-function
   onConfirm() {
   }
 
@@ -30,6 +31,7 @@ export default class ModalConfirmView extends AbstractView {
    * Обработчик клика на кнопку отмены выбора
    * Пустой, должен быть определен для обработки события отмены выбора
    */
+  // eslint-disable-next-line no-empty-function
   onCancel() {
   }
 

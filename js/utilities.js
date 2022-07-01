@@ -9,9 +9,9 @@
  * @return {number} - псевдослучайное число в заданном диапазоне
  */
 export function getRandomIntInclusive(min = 0, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min; // Максимум и минимум включаются
+  const bottomLimit = Math.ceil(min);
+  const upperLimit = Math.floor(max);
+  return Math.floor(Math.random() * (upperLimit - bottomLimit + 1)) + bottomLimit; // Максимум и минимум включаются
 }
 
 /**
@@ -43,13 +43,13 @@ export function getTimeComponents(time) {
 /**
  * Функция склонения слов идущим за заданным числом
  * Например, 1 комментарИЙ, 2 комментарИЯ, 10 комментарИЕВ
- * @param {number} num - число, в соотвествии с которым нужно изменить окончание следующего за ним слова
+ * @param {number} number - число, в соотвествии с которым нужно изменить окончание следующего за ним слова
  * @param {array} word - массив слов, которые идут за этим числом с соответствующими окончаниями
  *  массив должен быть со следующими словами [склонение слова для числа 1, склонение слова для числа 2, склонение слова для числа 0]
  * @return {string} - строка вида 'число слово_в_склоненни_соответствующего_числу'
  */
-export function wordFrom(num, word) {
-  num = +num;
+export function wordFrom(number, word) {
+  const num = +number;
   if (isNaN(num)) {
     return word[2];
   }

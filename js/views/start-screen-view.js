@@ -24,6 +24,7 @@ export default class StartScreenView extends AbstractView {
    * Обработчик клика на кнопку старта игры
    * Пустой, должен быть определен для обработки события старта игры
    */
+  // eslint-disable-next-line no-empty-function
   onStartBtnClick() {
   }
 
