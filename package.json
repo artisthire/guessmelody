@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "autoprefixer": "10.4.7",
-    "browser-sync": "^2.27.10",
+    "browser-sync": "^2.29.1",
     "chai": "4.3.6",
     "css-mqpacker": "6.0.2",
     "del": "6.1.1",
